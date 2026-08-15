@@ -1,8 +1,46 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from './assets/vite.svg'
 import heroImg from './assets/hero.png'
+import { api } from './api/client'
 import './App.css'
+
+type Health = {
+  status: string
+  environment: string
+  database: string
+}
+
+function BackendStatus() {
+  const [health, setHealth] = useState<Health | null>(null)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    api
+      .get<Health>('/health')
+      .then(setHealth)
+      .catch((err: unknown) =>
+        setError(err instanceof Error ? err.message : 'Backend unreachable'),
+      )
+  }, [])
+
+  if (error) {
+    return (
+      <p>
+        Backend: <strong className="status-error">{error}</strong>
+      </p>
+    )
+  }
+  if (!health) {
+    return <p>Backend: connecting…</p>
+  }
+  return (
+    <p>
+      Backend: <strong className="status-ok">connected</strong> · env:{' '}
+      {health.environment} · db: {health.database}
+    </p>
+  )
+}
 
 function App() {
   const [count, setCount] = useState(0)
@@ -20,6 +58,7 @@ function App() {
           <p>
             Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
           </p>
+          <BackendStatus />
         </div>
         <button
           type="button"
