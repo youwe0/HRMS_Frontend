@@ -1,26 +1,50 @@
+import { Routes, Route, Navigate } from "react-router-dom";
+
+import LoginPage from "@/pages/Login";
 import { AppSidebar } from "@/components/layout/AppSidebar";
 import {
   SidebarInset,
   SidebarProvider,
-  // SidebarTrigger,
 } from "@/components/ui/sidebar";
+import { getAuthToken } from "@/api/client";
 
-function App() {
+function ProtectedRoute({ children }: { children: React.ReactNode }) {
+  if (!getAuthToken()) {
+    return <Navigate to="/login" replace />;
+  }
+  return <>{children}</>;
+}
+
+function DashboardPage() {
   return (
     <SidebarProvider defaultOpen={false}>
       <AppSidebar />
       <SidebarInset>
-        {/* <header className="flex h-14 shrink-0 items-center gap-2 border-b px-4">
-          <SidebarTrigger className="-ml-1" />
-        </header> */}
         <main className="flex flex-1 flex-col items-center justify-center gap-4 p-6">
           <h1 className="text-2xl font-semibold tracking-tight">
-            HRMS Frontend
+            HRMS Dashboard
           </h1>
-          <p>Backend: under development</p>
+          <p>You are logged in.</p>
         </main>
       </SidebarInset>
     </SidebarProvider>
+  );
+}
+
+function App() {
+  return (
+    <Routes>
+      <Route path="/login" element={<LoginPage />} />
+      <Route
+        path="/dashboard"
+        element={
+          <ProtectedRoute>
+            <DashboardPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route path="*" element={<Navigate to="/login" replace />} />
+    </Routes>
   );
 }
 
