@@ -29,10 +29,15 @@ export default function LoginPage() {
     try {
       const passwordHash = await sha256(password);
 
-      const data = await api.post<LoginResponse>(API_ENDPOINTS.LOGIN, {
-        userName,
-        passwordHash,
-      });
+      const payload = { userName, passwordHash };
+
+
+      // login api call  paylaod 
+      // console.log("Login payload:", payload);
+
+
+
+      const data = await api.post<LoginResponse>(API_ENDPOINTS.LOGIN, payload);
 
       setAuthToken(data.token);
       navigate("/dashboard", { replace: true });
