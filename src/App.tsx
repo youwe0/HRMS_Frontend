@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 
 import LoginPage from "@/pages/Login";
+import EmployeesPage from "@/pages/Employees";
 import { AppSidebar } from "@/components/layout/AppSidebar";
 import {
   SidebarInset,
@@ -43,7 +44,20 @@ function App() {
           </ProtectedRoute>
         }
       />
-      <Route path="*" element={<Navigate to="/login" replace />} />
+      <Route
+        path="/employees"
+        element={
+          <ProtectedRoute>
+            <SidebarProvider defaultOpen={false}>
+              <AppSidebar />
+              <SidebarInset>
+                <EmployeesPage />
+              </SidebarInset>
+            </SidebarProvider>
+          </ProtectedRoute>
+        }
+      />
+      <Route path="*" element={<Navigate to="/dashboard" replace />} />
     </Routes>
   );
 }
