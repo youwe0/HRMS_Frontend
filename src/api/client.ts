@@ -1,11 +1,11 @@
 import { API_BASE_URL } from "../config";
 
-/** localStorage key holding the JWT access token. */
+// localStorage key holding the JWT access token.
 export const TOKEN_STORAGE_KEY = "hrms_access_token";
 
 export type ApiErrorDetail = { field: string; message: string };
 
-/** Envelope returned by the backend for every response. */
+// Envelope returned by the backend for every response.
 export type ApiResponse<T> = {
   success: boolean;
   message: string;
@@ -82,6 +82,12 @@ const request = async <T>(
   }
 
   if (!response.ok) {
+    // Auto-logout on 401 (expired / invalid token)
+    if (response.status === 401 && getAuthToken()) {
+      setAuthToken(null);
+      window.location.href = "/login?session_expired=1";
+    }
+
     throw new ApiError(
       response.status,
       payload?.message ?? `Request failed with status ${response.status}`,
@@ -92,7 +98,7 @@ const request = async <T>(
   return payload?.data as T;
 };
 
-/** HTTP verbs mapped over the fetch client. */
+// HTTP verbs mapped over the fetch client. 
 export const api = {
   get: <T>(path: string, query?: QueryParams) => request<T>(path, { query }),
   post: <T>(path: string, body?: unknown) =>

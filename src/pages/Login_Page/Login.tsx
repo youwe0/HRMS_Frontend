@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Building2, Loader2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,8 @@ type LoginResponse = {
 
 export default function LoginPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const sessionExpired = searchParams.get("session_expired") === "1";
 
   const [userName, setUserName] = useState("");
   const [password, setPassword] = useState("");
@@ -28,14 +30,11 @@ export default function LoginPage() {
 
     try {
       const passwordHash = await sha256(password);
-
       const payload = { userName, passwordHash };
 
-
       // login api call  paylaod 
+      // console.log("Login password:", password);
       // console.log("Login payload:", payload);
-
-
 
       const data = await api.post<LoginResponse>(API_ENDPOINTS.LOGIN, payload);
 
@@ -69,6 +68,11 @@ export default function LoginPage() {
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
+          {sessionExpired && (
+            <div className="rounded-lg border border-orange-400/50 bg-orange-50 px-3 py-2 text-sm text-orange-800 dark:bg-orange-950 dark:text-orange-300 dark:border-orange-500/30">
+              Your session has expired. Please sign in again.
+            </div>
+          )}
           {error && (
             <div className="rounded-lg border border-destructive/50 bg-destructive/10 px-3 py-2 text-sm text-destructive">
               {error}
