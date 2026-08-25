@@ -11,6 +11,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { Header } from "@/components/layout/Header";
 
 // ──────────────────────────────────────────────
 // Dummy data — replace with real API calls later
@@ -84,11 +85,7 @@ export default function DashboardPage() {
 
   return (
     <div className="flex flex-1 flex-col gap-6 p-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Dashboard</h1>
-        <p className="text-sm text-muted-foreground">{today}</p>
-      </div>
+      <Header title="Dashboard" description={today} showBack={false} />
 
       {/* ── Quick Stats ── */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

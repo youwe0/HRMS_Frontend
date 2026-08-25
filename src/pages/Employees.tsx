@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/card";
 import { api } from "@/api/client";
 import { API_ENDPOINTS } from "@/config/endpoints";
+import { Header } from "@/components/layout/Header";
 
 type RegisterResponse = {
   id: string;
@@ -50,12 +51,11 @@ export default function EmployeesPage() {
 
   return (
     <div className="flex flex-1 flex-col gap-6 p-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Employees</h1>
-        <p className="text-sm text-muted-foreground">
-          Register new employees into the system.
-        </p>
-      </div>
+      <Header
+        title="Employees"
+        description="Register new employees into the system."
+        showBack={true}
+      />
 
       <Card className="w-full max-w-md">
         <CardHeader>
