@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 
 import LoginPage from "@/pages/Login";
+import DashboardPage from "@/pages/Dashboard";
 import EmployeesPage from "@/pages/Employees";
 import { AppSidebar } from "@/components/layout/AppSidebar";
 import {
@@ -16,22 +17,6 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
-function DashboardPage() {
-  return (
-    <SidebarProvider defaultOpen={false}>
-      <AppSidebar />
-      <SidebarInset>
-        <main className="flex flex-1 flex-col items-center justify-center gap-4 p-6">
-          <h1 className="text-2xl font-semibold tracking-tight">
-            HRMS Dashboard
-          </h1>
-          <p>You are logged in.</p>
-        </main>
-      </SidebarInset>
-    </SidebarProvider>
-  );
-}
-
 function App() {
   return (
     <Routes>
@@ -40,7 +25,12 @@ function App() {
         path="/dashboard"
         element={
           <ProtectedRoute>
-            <DashboardPage />
+            <SidebarProvider defaultOpen={false}>
+              <AppSidebar />
+              <SidebarInset>
+                <DashboardPage />
+              </SidebarInset>
+            </SidebarProvider>
           </ProtectedRoute>
         }
       />
