@@ -1,8 +1,8 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 
-import LoginPage from "@/pages/Login";
-import DashboardPage from "@/pages/Dashboard";
-import EmployeesPage from "@/pages/Employees";
+import LoginPage from "@/pages/Login_Page/Login";
+import DashboardPage from "@/pages/Dashboard/Dashboard";
+import EmployeesPage from "@/pages/Employee_page/Employees";
 import { AppSidebar } from "@/components/layout/AppSidebar";
 import {
   SidebarInset,
