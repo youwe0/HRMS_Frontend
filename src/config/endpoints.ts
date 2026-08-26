@@ -8,6 +8,7 @@ export const API_ENDPOINTS = {
   LOGIN: "/auth/login",
   GET_EMPLOYEES: "/employees",
   CREATE_DEPARTMENT: "/departments",
+  GET_DEPARTMENTS: "/departments",
 } as const;
 
 export type Endpoint = (typeof API_ENDPOINTS)[keyof typeof API_ENDPOINTS];

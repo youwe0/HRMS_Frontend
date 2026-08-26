@@ -9,6 +9,14 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { api } from "@/api/client";
 import { API_ENDPOINTS } from "@/config/endpoints";
 import { Header } from "@/components/layout/Header";
@@ -38,7 +46,7 @@ export default function DepartmentsPage() {
     setError("");
     try {
       const data = await api.get<DepartmentsResponse>(
-        API_ENDPOINTS.CREATE_DEPARTMENT,
+        API_ENDPOINTS.GET_DEPARTMENTS,
       );
       setDepartments(data.departments);
     } catch (err: unknown) {
@@ -106,32 +114,34 @@ export default function DepartmentsPage() {
               No departments found.
             </p>
           ) : (
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {departments.map((dept) => (
-                <Card key={dept.id} className="overflow-hidden py-3">
-                  <CardContent className="flex items-center justify-between gap-3 px-4">
-                    <div className="flex items-center gap-3">
-                      <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-blue-100 text-sm font-semibold text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
-                        <Building2 className="size-5" />
-                      </div>
-                      <span className="truncate font-medium">
-                        {dept.department}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <span className="text-xs text-muted-foreground">
-                        #{dept.id}
-                      </span>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>ID</TableHead>
+                  <TableHead>Department</TableHead>
+                  <TableHead>HOD</TableHead>
+                  <TableHead>Status</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {departments.map((dept) => (
+                  <TableRow key={dept.id}>
+                    <TableCell className="font-medium">#{dept.id}</TableCell>
+                    <TableCell>{dept.department}</TableCell>
+                    <TableCell>
+                      {dept.hod !== null ? `User #${dept.hod}` : "—"}
+                    </TableCell>
+                    <TableCell>
                       <Badge
-                        variant={dept.isActive ? "secondary" : "destructive"}
+                        className={dept.isActive ? "bg-green-100 text-green-700 hover:bg-green-100 dark:bg-green-900/30 dark:text-green-400" : "bg-red-100 text-red-700 hover:bg-red-100 dark:bg-red-900/30 dark:text-red-400"}
                       >
                         {dept.isActive ? "Active" : "Inactive"}
                       </Badge>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           )}
         </CardContent>
       </Card>
