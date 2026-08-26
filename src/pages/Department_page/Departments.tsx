@@ -27,9 +27,6 @@ import { EditDepartmentDialog } from "@/pages/Department_page/EditDepartmentDial
 type Department = {
   id: number;
   department: string;
-  hod: number | null;
-  createdAt: string;
-  createdBy: number;
   isActive: number;
 };
 
@@ -44,6 +41,7 @@ export default function DepartmentsPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [selectedDept, setSelectedDept] = useState<Department | null>(null);
 
   const fetchDepartments = useCallback(async () => {
     setLoading(true);
@@ -98,6 +96,9 @@ export default function DepartmentsPage() {
       <DeleteDepartmentDialog
         open={deleteDialogOpen}
         onOpenChange={setDeleteDialogOpen}
+        departmentId={selectedDept?.id ?? null}
+        departmentName={selectedDept?.department ?? ""}
+        onDeleted={() => fetchDepartments()}
       />
       <EditDepartmentDialog
         open={editDialogOpen}
@@ -131,7 +132,6 @@ export default function DepartmentsPage() {
                 <TableRow>
                   <TableHead>ID</TableHead>
                   <TableHead>Department</TableHead>
-                  <TableHead>HOD</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
@@ -141,9 +141,6 @@ export default function DepartmentsPage() {
                   <TableRow key={dept.id}>
                     <TableCell className="font-medium">#{dept.id}</TableCell>
                     <TableCell>{dept.department}</TableCell>
-                    <TableCell>
-                      {dept.hod !== null ? `User #${dept.hod}` : "—"}
-                    </TableCell>
                     <TableCell>
                       <Badge
                         className={dept.isActive ? "bg-green-100 text-green-700 hover:bg-green-100 dark:bg-green-900/30 dark:text-green-400" : "bg-red-100 text-red-700 hover:bg-red-100 dark:bg-red-900/30 dark:text-red-400"}
@@ -164,7 +161,10 @@ export default function DepartmentsPage() {
                         <Button
                           variant="delete-icon-button"
                           size="icon"
-                          onClick={() => setDeleteDialogOpen(true)}
+                          onClick={() => {
+                            setSelectedDept(dept);
+                            setDeleteDialogOpen(true);
+                          }}
                           aria-label="Delete department"
                         >
                           <Trash2 className="size-4" />

@@ -9,6 +9,7 @@ export const API_ENDPOINTS = {
   GET_EMPLOYEES: "/employees",
   CREATE_DEPARTMENT: "/departments",
   GET_DEPARTMENTS: "/departments",
+  DELETE_DEPARTMENT: (id: number) => `/departments/${id}`,
 } as const;
 
 export type Endpoint = (typeof API_ENDPOINTS)[keyof typeof API_ENDPOINTS];
