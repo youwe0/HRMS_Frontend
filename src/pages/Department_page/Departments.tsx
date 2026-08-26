@@ -23,6 +23,7 @@ import { Header } from "@/components/layout/Header";
 import { AddDepartmentDialog } from "@/pages/Department_page/AddDepartmentDialog";
 import { DeleteDepartmentDialog } from "@/pages/Department_page/DeleteDepartmentDialog";
 import { EditDepartmentDialog } from "@/pages/Department_page/EditDepartmentDialog";
+import { createModuleCache } from "@/lib/indexedDb";
 
 type Department = {
   id: number;
@@ -34,6 +35,8 @@ type DepartmentsResponse = {
   departments: Department[];
 };
 
+const departmentCache = createModuleCache<Department[]>("departments");
+
 export default function DepartmentsPage() {
   const [departments, setDepartments] = useState<Department[]>([]);
   const [loading, setLoading] = useState(true);
@@ -43,14 +46,27 @@ export default function DepartmentsPage() {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [selectedDept, setSelectedDept] = useState<Department | null>(null);
 
-  const fetchDepartments = useCallback(async () => {
+  const fetchDepartments = useCallback(async (forceRefresh = false) => {
     setLoading(true);
     setError("");
+
     try {
+      // Try IndexedDB cache first (unless a fresh fetch is forced).
+      if (!forceRefresh) {
+        const cached = await departmentCache.get();
+        if (cached && cached.length > 0) {
+          setDepartments(cached);
+          setLoading(false);
+          return;
+        }
+      }
+
+      // Cache miss or force-refresh: fetch from the API.
       const data = await api.get<DepartmentsResponse>(
         API_ENDPOINTS.GET_DEPARTMENTS,
       );
       setDepartments(data.departments);
+      await departmentCache.save(data.departments);
     } catch (err: unknown) {
       const msg =
         (err as { message?: string }).message || "Failed to load departments.";
@@ -91,14 +107,20 @@ export default function DepartmentsPage() {
       <AddDepartmentDialog
         open={dialogOpen}
         onOpenChange={setDialogOpen}
-        onCreated={() => fetchDepartments()}
+        onCreated={async () => {
+          await departmentCache.clear();
+          await fetchDepartments(true);
+        }}
       />
       <DeleteDepartmentDialog
         open={deleteDialogOpen}
         onOpenChange={setDeleteDialogOpen}
         departmentId={selectedDept?.id ?? null}
         departmentName={selectedDept?.department ?? ""}
-        onDeleted={() => fetchDepartments()}
+        onDeleted={async () => {
+          await departmentCache.clear();
+          await fetchDepartments(true);
+        }}
       />
       <EditDepartmentDialog
         open={editDialogOpen}
