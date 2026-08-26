@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { Loader2, Building2 } from "lucide-react";
+import { Loader2, Building2, Trash2, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -21,6 +21,8 @@ import { api } from "@/api/client";
 import { API_ENDPOINTS } from "@/config/endpoints";
 import { Header } from "@/components/layout/Header";
 import { AddDepartmentDialog } from "@/pages/Department_page/AddDepartmentDialog";
+import { DeleteDepartmentDialog } from "@/pages/Department_page/DeleteDepartmentDialog";
+import { EditDepartmentDialog } from "@/pages/Department_page/EditDepartmentDialog";
 
 type Department = {
   id: number;
@@ -40,6 +42,8 @@ export default function DepartmentsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
 
   const fetchDepartments = useCallback(async () => {
     setLoading(true);
@@ -91,6 +95,14 @@ export default function DepartmentsPage() {
         onOpenChange={setDialogOpen}
         onCreated={() => fetchDepartments()}
       />
+      <DeleteDepartmentDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+      />
+      <EditDepartmentDialog
+        open={editDialogOpen}
+        onOpenChange={setEditDialogOpen}
+      />
 
       <Card className="w-full">
         <CardHeader>
@@ -121,6 +133,7 @@ export default function DepartmentsPage() {
                   <TableHead>Department</TableHead>
                   <TableHead>HOD</TableHead>
                   <TableHead>Status</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -137,6 +150,26 @@ export default function DepartmentsPage() {
                       >
                         {dept.isActive ? "Active" : "Inactive"}
                       </Badge>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex items-center justify-end gap-1">
+                        <Button
+                          variant="edit-icon-button"
+                          size="icon"
+                          onClick={() => setEditDialogOpen(true)}
+                          aria-label="Edit department"
+                        >
+                          <Pencil className="size-4" />
+                        </Button>
+                        <Button
+                          variant="delete-icon-button"
+                          size="icon"
+                          onClick={() => setDeleteDialogOpen(true)}
+                          aria-label="Delete department"
+                        >
+                          <Trash2 className="size-4" />
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
