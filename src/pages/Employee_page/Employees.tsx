@@ -21,6 +21,7 @@ import { api } from "@/api/client";
 import { API_ENDPOINTS } from "@/config/endpoints";
 import { Header } from "@/components/layout/Header";
 import { AddEmployeeDialog } from "@/pages/Employee_page/AddEmployeeDialog";
+import { createModuleCache } from "@/lib/indexedDb";
 
 type Employee = {
   userId: number;
@@ -43,6 +44,9 @@ type EmployeesResponse = {
 
 const PAGE_LIMIT = 10;
 
+// IndexedDB cache for the employee list.
+const employeesCache = createModuleCache<Employee[]>("employees");
+
 export default function EmployeesPage() {
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [employeesLoading, setEmployeesLoading] = useState(true);
@@ -59,6 +63,8 @@ export default function EmployeesPage() {
         API_ENDPOINTS.GET_EMPLOYEES,
         { page, limit: PAGE_LIMIT },
       );
+      // Cache the employee list for the current page.
+      await employeesCache.save(data.employees);
       setEmployees(data.employees);
       setPagination(data.pagination);
     } catch (err: unknown) {
@@ -74,9 +80,19 @@ export default function EmployeesPage() {
     let cancelled = false;
 
     async function load() {
-      if (!cancelled) {
-        await fetchEmployees(currentPage);
+      if (cancelled) return;
+
+      // Try cache first (only for the first page).
+      if (currentPage === 1) {
+        const cached = await employeesCache.get();
+        if (cached && !cancelled) {
+          setEmployees(cached);
+          setEmployeesLoading(false);
+          return;
+        }
       }
+
+      await fetchEmployees(currentPage);
     }
 
     load();
@@ -142,7 +158,11 @@ export default function EmployeesPage() {
       <AddEmployeeDialog
         open={dialogOpen}
         onOpenChange={setDialogOpen}
-        onRegistered={() => fetchEmployees(currentPage)}
+        onRegistered={async () => {
+          // Clear the cache so the next fetch gets fresh data.
+          await employeesCache.clear();
+          await fetchEmployees(currentPage);
+        }}
       />
 
       <Card className="w-full">
@@ -180,9 +200,11 @@ export default function EmployeesPage() {
                     <Card key={emp.userId} className="overflow-hidden py-3">
                       <CardContent className="flex items-center justify-between gap-3 px-4">
                         <div className="flex items-center gap-3">
-                        <div className={`flex size-10 shrink-0 items-center justify-center rounded-full text-sm font-semibold ${emp.isActive ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"}`}>
-                          {initials || "??"}
-                        </div>
+                          <div
+                            className={`flex size-10 shrink-0 items-center justify-center rounded-full text-sm font-semibold ${emp.isActive ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"}`}
+                          >
+                            {initials || "??"}
+                          </div>
                           <span className="truncate font-medium">
                             {emp.userName}
                           </span>
