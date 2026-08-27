@@ -23,7 +23,7 @@
 export const IDB_DB_NAME = "hrms-cache-db";
 
 // Version passed to `openDB`. Bump when the schema changes.
-export const IDB_DB_VERSION = 2;
+export const IDB_DB_VERSION = 3;
 
 // Name of the single key-value object store used for all cache entries.
 export const IDB_STORE_NAME = "DepartmentCacheStore";
@@ -39,6 +39,7 @@ const HOURS_12 = 12 * 60 * 60 * 1000;
 export const CACHE_TTL = {
   departments: HOURS_24,
   employees: HOURS_12,
+  users: HOURS_24,
 
   //   Future modules — uncomment and set TTL:
   // roles:      60 * 60 * 1000,   // 1 hour
