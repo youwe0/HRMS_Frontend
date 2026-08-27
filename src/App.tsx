@@ -4,6 +4,7 @@ import LoginPage from "@/pages/Login_Page/Login";
 import DashboardPage from "@/pages/Dashboard/Dashboard";
 import EmployeesPage from "@/pages/Employee_page/Employees";
 import DepartmentsPage from "@/pages/Department_page/Departments";
+import DesignationsPage from "@/pages/Designation_page/Designations";
 import { AppSidebar } from "@/components/layout/AppSidebar";
 import {
   SidebarInset,
@@ -56,6 +57,19 @@ function App() {
               <AppSidebar />
               <SidebarInset>
                 <DepartmentsPage />
+              </SidebarInset>
+            </SidebarProvider>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/designations"
+        element={
+          <ProtectedRoute>
+            <SidebarProvider defaultOpen={false}>
+              <AppSidebar />
+              <SidebarInset>
+                <DesignationsPage />
               </SidebarInset>
             </SidebarProvider>
           </ProtectedRoute>

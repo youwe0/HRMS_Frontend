@@ -38,6 +38,7 @@ const HOURS_12 = 12 * 60 * 60 * 1000;
 
 export const CACHE_TTL = {
   departments: HOURS_24,
+  designations: HOURS_24,
   employees: HOURS_12,
   users: HOURS_24,
 

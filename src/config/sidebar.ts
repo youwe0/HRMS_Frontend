@@ -65,6 +65,7 @@ export const sidebarSections: SidebarSection[] = [
       { title: "Onboarding", url: "/onboarding", icon: UserPlus },
       { title: "Offboarding", url: "/offboarding", icon: UserMinus },
       { title: "Departments", url: "/departments", icon: Building2 },
+      { title: "Designations", url: "/designations", icon: Briefcase },
       { title: "Organization Chart", url: "/org-chart", icon: Network },
     ],
   },
