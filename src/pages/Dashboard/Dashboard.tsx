@@ -84,7 +84,7 @@ export default function DashboardPage() {
   });
 
   return (
-    <div className="flex flex-1 flex-col gap-6 p-6">
+    <div className="flex flex-1 flex-col gap-6 p-2 md:p-6">
       <Header title="Dashboard" description={today} showBack={false} />
 
       {/* ── Quick Stats ── */}

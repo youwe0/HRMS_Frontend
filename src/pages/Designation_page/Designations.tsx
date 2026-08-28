@@ -90,7 +90,7 @@ export default function DesignationsPage() {
   }, [fetchDesignations]);
 
   return (
-    <div className="flex flex-1 flex-col gap-6 p-6">
+    <div className="flex flex-1 flex-col gap-6 p-2 md:p-6">
       <Header
         title="Designations"
         description="Manage designations in the organization."

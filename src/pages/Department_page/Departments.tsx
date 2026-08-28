@@ -92,7 +92,7 @@ export default function DepartmentsPage() {
   }, [fetchDepartments]);
 
   return (
-    <div className="flex flex-1 flex-col gap-6 p-6">
+    <div className="flex flex-1 flex-col gap-6 p-2 md:p-6">
       <Header
         title="Departments"
         description="Manage departments in the organization."

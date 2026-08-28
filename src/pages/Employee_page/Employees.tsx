@@ -143,7 +143,7 @@ export default function EmployeesPage() {
   };
 
   return (
-    <div className="flex flex-1 flex-col gap-6 p-6">
+    <div className="flex flex-1 flex-col gap-6 p-2 md:p-6">
       <Header
         title="Employees"
         description="Register new employees into the system."
