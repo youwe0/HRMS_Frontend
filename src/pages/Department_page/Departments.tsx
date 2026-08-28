@@ -20,6 +20,7 @@ import {
 import { api } from "@/api/client";
 import { API_ENDPOINTS } from "@/config/endpoints";
 import { Header } from "@/components/layout/Header";
+import { PageLayout } from "@/components/layout/PageLayout";
 import { AddDepartmentDialog } from "@/pages/Department_page/AddDepartmentDialog";
 import { DeleteDepartmentDialog } from "@/pages/Department_page/DeleteDepartmentDialog";
 import { EditDepartmentDialog } from "@/pages/Department_page/EditDepartmentDialog";
@@ -92,7 +93,7 @@ export default function DepartmentsPage() {
   }, [fetchDepartments]);
 
   return (
-    <div className="flex flex-1 flex-col gap-6 p-2 md:p-6">
+    <PageLayout>
       <Header
         title="Departments"
         description="Manage departments in the organization."
@@ -200,6 +201,6 @@ export default function DepartmentsPage() {
           )}
         </CardContent>
       </Card>
-    </div>
+    </PageLayout>
   );
 }

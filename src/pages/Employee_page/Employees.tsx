@@ -20,6 +20,7 @@ import {
 import { api } from "@/api/client";
 import { API_ENDPOINTS } from "@/config/endpoints";
 import { Header } from "@/components/layout/Header";
+import { PageLayout } from "@/components/layout/PageLayout";
 import { AddEmployeeDialog } from "@/pages/Employee_page/AddEmployeeDialog";
 import { createModuleCache } from "@/lib/indexedDb";
 
@@ -143,7 +144,7 @@ export default function EmployeesPage() {
   };
 
   return (
-    <div className="flex flex-1 flex-col gap-6 p-2 md:p-6">
+    <PageLayout>
       <Header
         title="Employees"
         description="Register new employees into the system."
@@ -279,6 +280,6 @@ export default function EmployeesPage() {
           )}
         </CardContent>
       </Card>
-    </div>
+    </PageLayout>
   );
 }

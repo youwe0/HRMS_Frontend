@@ -12,6 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Header } from "@/components/layout/Header";
+import { PageLayout } from "@/components/layout/PageLayout";
 
 // ──────────────────────────────────────────────
 // Dummy data — replace with real API calls later
@@ -84,7 +85,7 @@ export default function DashboardPage() {
   });
 
   return (
-    <div className="flex flex-1 flex-col gap-6 p-2 md:p-6">
+    <PageLayout>
       <Header title="Dashboard" description={today} showBack={false} />
 
       {/* ── Quick Stats ── */}
@@ -283,6 +284,6 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
       </div>
-    </div>
+    </PageLayout>
   );
 }

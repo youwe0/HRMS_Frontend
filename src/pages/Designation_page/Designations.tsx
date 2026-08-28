@@ -20,6 +20,7 @@ import {
 import { api } from "@/api/client";
 import { API_ENDPOINTS } from "@/config/endpoints";
 import { Header } from "@/components/layout/Header";
+import { PageLayout } from "@/components/layout/PageLayout";
 import { AddDesignationDialog } from "@/pages/Designation_page/AddDesignationDialog";
 import { DeleteDesignationDialog } from "@/pages/Designation_page/DeleteDesignationDialog";
 import { createModuleCache } from "@/lib/indexedDb";
@@ -90,7 +91,7 @@ export default function DesignationsPage() {
   }, [fetchDesignations]);
 
   return (
-    <div className="flex flex-1 flex-col gap-6 p-2 md:p-6">
+    <PageLayout>
       <Header
         title="Designations"
         description="Manage designations in the organization."
@@ -188,6 +189,6 @@ export default function DesignationsPage() {
           )}
         </CardContent>
       </Card>
-    </div>
+    </PageLayout>
   );
 }
