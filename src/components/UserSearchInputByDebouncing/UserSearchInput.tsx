@@ -1,47 +1,48 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { Search, X, User } from "lucide-react";
+import { Search, X, User, Building2, Award } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { api } from "@/api/client";
 import { API_ENDPOINTS } from "@/config/endpoints";
-import { createModuleCache, cacheSet } from "@/lib/indexedDb";
 
-//   Types
-
-export type UserSearchResult = {
-  userId: number;
-  userName: string;
+// Types
+export type EntitySearchResult = {
+  id: number;
+  label: string;
+  sublabel?: string;
 };
 
+export type SearchForType = "user" | "department" | "designation";
+
 interface UserSearchInputProps {
-  // Currently selected user ID (controlled).
+  // Currently selected entity ID (controlled).
   value: number | null;
-  // Called when the user selects or clears a user.
-  onChange: (userId: number | null, userName?: string) => void;
+  // Called when the user selects or clears an entity.
+  onChange: (id: number | null, label?: string) => void;
   // Placeholder text for the input.
   placeholder?: string;
   // Disable the entire input.
   disabled?: boolean;
+  // Which entity type to search for. Defaults to "user".
+  searchFor?: SearchForType;
 }
 
-//   IndexedDB cache for search results
+// Icon mapping per entity type
+const ENTITY_ICONS: Record<SearchForType, typeof User> = {
+  user: User,
+  department: Building2,
+  designation: Award,
+};
 
-const users = createModuleCache<UserSearchResult[]>("users");
-
-// Store individual user entries as separate IndexedDB records for easy DevTools inspection.
-const CACHE_TTL_USERS = 24 * 60 * 60 * 1000; // 24 hours
-const saveUserEntry = (user: UserSearchResult) =>
-  cacheSet(`user_${user.userId}`, user, CACHE_TTL_USERS);
-
-//   Component
-
+// Component
 export function UserSearchInput({
   value,
   onChange,
   placeholder = "Search user by name…",
   disabled = false,
+  searchFor = "user",
 }: UserSearchInputProps) {
   const [query, setQuery] = useState("");
-  const [results, setResults] = useState<UserSearchResult[]>([]);
+  const [results, setResults] = useState<EntitySearchResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
@@ -51,7 +52,6 @@ export function UserSearchInput({
   const debounceTimer = useRef<ReturnType<typeof setTimeout>>(null);
 
   //   Click-outside to close
-
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
       if (
@@ -65,73 +65,37 @@ export function UserSearchInput({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  //   Search logic: IndexedDB first, then API fallback    ─
-
-  const doSearch = useCallback(async (term: string) => {
-    const trimmed = term.trim();
-    if (!trimmed) {
-      setResults([]);
-      setOpen(false);
-      return;
-    }
-
-    setLoading(true);
-    try {
-      // 1. Check IndexedDB cache — try bulk array first, then individual entries
-      const cached = await users.get();
-      console.log("[UserSearch] IndexedDB bulk cache:", cached);
-
-      // Also scan individual user_<id> entries as a fallback
-      let pool: UserSearchResult[] = cached ?? [];
-      if (pool.length === 0) {
-        // No bulk cache — scan individual entries from IDB
-        pool = await scanIndividualUserEntries();
-        console.log("[UserSearch] IndexedDB individual entries:", pool);
+  //   Search logic: debounced API call
+  const doSearch = useCallback(
+    async (term: string) => {
+      const trimmed = term.trim();
+      if (!trimmed) {
+        setResults([]);
+        setOpen(false);
+        return;
       }
 
-      if (pool.length > 0) {
-        const filtered = pool.filter((u) =>
-          u.userName.toLowerCase().includes(trimmed.toLowerCase()),
+      setLoading(true);
+      try {
+        const data = await api.get<{ results: EntitySearchResult[] }>(
+          API_ENDPOINTS.SEARCH_USERS,
+          { q: trimmed, searchFor },
         );
-        if (filtered.length > 0) {
-          setResults(filtered.slice(0, 5));
-          setOpen(true);
-          setLoading(false);
-          return;
-        }
+
+        const fetched = data.results ?? [];
+        setResults(fetched);
+        setOpen(fetched.length > 0);
+      } catch {
+        setResults([]);
+        setOpen(false);
+      } finally {
+        setLoading(false);
       }
-
-      // 2. Cache miss — hit the backend API
-      const data = await api.get<{ users: UserSearchResult[] }>(
-        API_ENDPOINTS.SEARCH_USERS,
-        { q: trimmed },
-      );
-
-      const fetched = data.users ?? [];
-
-      // Save to IndexedDB for future local lookups
-      if (fetched.length > 0) {
-        const existing = (await users.get()) ?? [];
-        const merged = mergeUsers(existing, fetched);
-        await users.save(merged);
-
-        // Also save each user as an individual entry for easy DevTools inspection.
-        await Promise.all(fetched.map(saveUserEntry));
-        console.log("[UserSearch] Saved to IndexedDB:", merged);
-      }
-
-      setResults(fetched);
-      setOpen(fetched.length > 0);
-    } catch {
-      setResults([]);
-      setOpen(false);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+    },
+    [searchFor],
+  );
 
   //   Debounced input handler
-
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
     setQuery(val);
@@ -151,17 +115,15 @@ export function UserSearchInput({
   };
 
   //   Select a result
-
-  const handleSelect = (user: UserSearchResult) => {
-    onChange(user.userId, user.userName);
-    setQuery(user.userName);
+  const handleSelect = (item: EntitySearchResult) => {
+    onChange(item.id, item.label);
+    setQuery(item.label);
     setOpen(false);
     setResults([]);
     setHighlightedIndex(-1);
   };
 
   //   Clear selection
-
   const handleClear = () => {
     onChange(null);
     setQuery("");
@@ -171,8 +133,7 @@ export function UserSearchInput({
     inputRef.current?.focus();
   };
 
-  //   Keyboard navigation   ─
-
+  // Keyboard navigation
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (!open || results.length === 0) return;
 
@@ -191,8 +152,9 @@ export function UserSearchInput({
     }
   };
 
-  //   Render
+  const IconComponent = ENTITY_ICONS[searchFor];
 
+  // Render
   return (
     <div ref={containerRef} className="relative w-full">
       <div className="relative">
@@ -230,21 +192,26 @@ export function UserSearchInput({
             </div>
           ) : results.length > 0 ? (
             <ul className="max-h-60 overflow-y-auto">
-              {results.map((user, index) => (
-                <li key={user.userId}>
+              {results.map((item, index) => (
+                <li key={item.id}>
                   <button
                     type="button"
-                    onClick={() => handleSelect(user)}
+                    onClick={() => handleSelect(item)}
                     className={`flex w-full items-center gap-2 px-3 py-2 text-left text-sm hover:bg-accent hover:text-accent-foreground ${
                       index === highlightedIndex
                         ? "bg-accent text-accent-foreground"
                         : ""
                     }`}
                   >
-                    <User className="size-4 shrink-0 text-muted-foreground" />
-                    <span className="truncate">{user.userName}</span>
+                    <IconComponent className="size-4 shrink-0 text-muted-foreground" />
+                    <span className="truncate">{item.label}</span>
+                    {item.sublabel && (
+                      <span className="ml-auto truncate text-xs text-muted-foreground">
+                        {item.sublabel}
+                      </span>
+                    )}
                     <span className="ml-auto text-xs text-muted-foreground">
-                      #{user.userId}
+                      #{item.id}
                     </span>
                   </button>
                 </li>
@@ -252,65 +219,18 @@ export function UserSearchInput({
             </ul>
           ) : (
             <div className="px-3 py-2 text-sm text-muted-foreground">
-              No users found
+              No results found
             </div>
           )}
         </div>
       )}
 
-      {/* Display selected user (when value is set but dropdown is closed) */}
+      {/* Display selected entity (when value is set but dropdown is closed) */}
       {value && !open && !query && (
         <p className="mt-1 text-xs text-muted-foreground">
-          Selected user ID: {value}
+          Selected ID: {value}
         </p>
       )}
     </div>
   );
-}
-
-//   Helpers
-
-// Merge two user arrays, deduplicating by userId.
-function mergeUsers(
-  existing: UserSearchResult[],
-  incoming: UserSearchResult[],
-): UserSearchResult[] {
-  const map = new Map<number, UserSearchResult>();
-  for (const u of existing) map.set(u.userId, u);
-  for (const u of incoming) map.set(u.userId, u);
-  return Array.from(map.values());
-}
-
-//
-//  * Scan all individual `user_<id>` entries from IndexedDB.
-//  * Uses the idb library's openDB to iterate the store.
-
-async function scanIndividualUserEntries(): Promise<UserSearchResult[]> {
-  const { openDB } = await import("idb");
-  const { IDB_DB_NAME, IDB_DB_VERSION, IDB_STORE_NAME } =
-    await import("@/config/ConfigIndexedDB");
-
-  try {
-    const db = await openDB(IDB_DB_NAME, IDB_DB_VERSION);
-    const allKeys = await db.getAllKeys(IDB_STORE_NAME);
-    const userKeys = allKeys.filter(
-      (k): k is string => typeof k === "string" && k.startsWith("user_"),
-    );
-
-    const results: UserSearchResult[] = [];
-    for (const key of userKeys) {
-      const record = (await db.get(IDB_STORE_NAME, key)) as
-        | {
-            data: UserSearchResult;
-            expiresAt: number;
-          }
-        | undefined;
-      if (record && (record.expiresAt === 0 || Date.now() < record.expiresAt)) {
-        results.push(record.data);
-      }
-    }
-    return results;
-  } catch {
-    return [];
-  }
 }

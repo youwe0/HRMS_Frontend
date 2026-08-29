@@ -104,6 +104,7 @@ export function AddDepartmentDialog({
                 value={hodUserId}
                 onChange={(userId) => setHodUserId(userId)}
                 placeholder="Search HOD by name…"
+                searchFor="user"
                 disabled={loading}
               />
             </div>
