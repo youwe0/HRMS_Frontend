@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { api, setAuthToken } from "@/api/client";
 import { API_ENDPOINTS } from "@/config/endpoints";
 import { sha256 } from "@/lib/crypto";
+import { useResourceBundle } from "@/hooks/useResourceBundle";
 
 type LoginResponse = {
   token: string;
@@ -17,6 +18,9 @@ export default function LoginPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const sessionExpired = searchParams.get("session_expired") === "1";
+
+  // Load resource bundle into IndexedDB cache on login page mount
+  useResourceBundle();
 
   const [userName, setUserName] = useState("");
   const [password, setPassword] = useState("");

@@ -41,6 +41,7 @@ export const CACHE_TTL = {
   designations: HOURS_24,
   employees: HOURS_12,
   users: HOURS_24,
+  resourceBundle: 0, // never expires — static config data
 
   //   Future modules — uncomment and set TTL:
   // roles:      60 * 60 * 1000,   // 1 hour

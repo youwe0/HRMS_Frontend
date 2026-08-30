@@ -14,6 +14,7 @@ export const API_ENDPOINTS = {
   CREATE_DESIGNATION: "/designations",
   GET_DESIGNATIONS: "/designations",
   DELETE_DESIGNATION: (id: number) => `/designations/${id}`,
+  GET_RESOURCE_BUNDLE: "/resource-bundle",
 } as const;
 
 export type Endpoint = (typeof API_ENDPOINTS)[keyof typeof API_ENDPOINTS];
