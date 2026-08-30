@@ -10,7 +10,15 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { ToastContainer, useToast } from "@/components/ui/toast";
+import { useResourceBundle } from "@/hooks/useResourceBundle";
 import { api } from "@/api/client";
 import { API_ENDPOINTS } from "@/config/endpoints";
 
@@ -30,6 +38,7 @@ export function AddLeaveTypeDialog({
   const [applicableFor, setApplicableFor] = useState("");
   const [loading, setLoading] = useState(false);
   const { toasts, dismiss, success, error: toastError } = useToast();
+  const { data: resourceBundle } = useResourceBundle();
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -115,14 +124,22 @@ export function AddLeaveTypeDialog({
               >
                 Applicable For
               </label>
-              <Input
-                id="dialog-applicableFor"
-                type="text"
-                placeholder="e.g. All employees (optional)"
+              <Select
                 value={applicableFor}
-                onChange={(e) => setApplicableFor(e.target.value)}
+                onValueChange={setApplicableFor}
                 disabled={loading}
-              />
+              >
+                <SelectTrigger id="dialog-applicableFor">
+                  <SelectValue placeholder="Select employee type (optional)" />
+                </SelectTrigger>
+                <SelectContent>
+                  {(resourceBundle?.Employee_type ?? []).map((type) => (
+                    <SelectItem key={type} value={type}>
+                      {type}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <DialogFooter>

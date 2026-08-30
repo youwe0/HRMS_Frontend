@@ -6,6 +6,7 @@ import { createModuleCache } from "@/lib/indexedDb";
 export type ResourceBundle = {
   Blood_group: string[];
   Gender: string[];
+  Employee_type: string[];
 };
 
 const resourceBundleCache = createModuleCache<ResourceBundle>("resourceBundle");
