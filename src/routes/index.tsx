@@ -6,6 +6,7 @@ import DashboardPage from "@/pages/Dashboard/Dashboard";
 import EmployeesPage from "@/pages/Employee_page/Employees";
 import DepartmentsPage from "@/pages/Department_page/Departments";
 import DesignationsPage from "@/pages/Designation_page/Designations";
+import LeaveTypesPage from "@/pages/LeaveType_page/LeaveTypes";
 
 export function AppRoutes() {
   return (
@@ -41,6 +42,14 @@ export function AppRoutes() {
         element={
           <ProtectedLayout>
             <DesignationsPage />
+          </ProtectedLayout>
+        }
+      />
+      <Route
+        path="/leave"
+        element={
+          <ProtectedLayout>
+            <LeaveTypesPage />
           </ProtectedLayout>
         }
       />

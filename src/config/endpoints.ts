@@ -14,6 +14,9 @@ export const API_ENDPOINTS = {
   CREATE_DESIGNATION: "/designations",
   GET_DESIGNATIONS: "/designations",
   DELETE_DESIGNATION: (id: number) => `/designations/${id}`,
+  CREATE_LEAVE_TYPE: "/leave-types",
+  GET_LEAVE_TYPES: "/leave-types",
+  DELETE_LEAVE_TYPE: (id: number) => `/leave-types/${id}`,
   GET_RESOURCE_BUNDLE: "/resource-bundle",
 } as const;
 
