@@ -54,8 +54,13 @@ export const sidebarSections: SidebarSection[] = [
     label: "Overview",
     items: [
       { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
-      { title: "My Profile", url: "/my-profile", icon: UserCircle },
       { title: "Announcements", url: "/announcements", icon: Megaphone },
+    ],
+  },
+  {
+    label: "Employement_details",
+    items: [
+      { title: "My Profile", url: "/my-profile", icon: UserCircle },
     ],
   },
   {

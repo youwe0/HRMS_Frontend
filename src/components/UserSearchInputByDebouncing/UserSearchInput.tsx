@@ -3,6 +3,7 @@ import { Search, X, User, Building2, Award } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { api } from "@/api/client";
 import { API_ENDPOINTS } from "@/config/endpoints";
+import { cacheGet, cacheSet } from "@/lib/indexedDb";
 
 // Types
 export type EntitySearchResult = {
@@ -65,13 +66,23 @@ export function UserSearchInput({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  //   Search logic: debounced API call
+  //   Search logic: debounced API call with IndexedDB caching
   const doSearch = useCallback(
     async (term: string) => {
       const trimmed = term.trim();
       if (!trimmed) {
         setResults([]);
         setOpen(false);
+        return;
+      }
+
+      const cacheKey = `search_${searchFor}_${trimmed.toLowerCase()}`;
+
+      // Check IndexedDB cache first
+      const cached = await cacheGet<EntitySearchResult[]>(cacheKey);
+      if (cached) {
+        setResults(cached);
+        setOpen(cached.length > 0);
         return;
       }
 
@@ -85,6 +96,9 @@ export function UserSearchInput({
         const fetched = data.results ?? [];
         setResults(fetched);
         setOpen(fetched.length > 0);
+
+        // Save to IndexedDB cache
+        await cacheSet(cacheKey, fetched);
       } catch {
         setResults([]);
         setOpen(false);

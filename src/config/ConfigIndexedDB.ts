@@ -35,6 +35,7 @@ export const IDB_STORE_NAME = "DepartmentCacheStore";
 // hours in milliseconds.
 const HOURS_24 = 24 * 60 * 60 * 1000;
 const HOURS_12 = 12 * 60 * 60 * 1000;
+// const MINUTES_10 = 10 * 60 * 1000;
 
 export const CACHE_TTL = {
   departments: HOURS_24,
@@ -43,6 +44,8 @@ export const CACHE_TTL = {
   users: HOURS_24,
   leaveTypes: HOURS_24,
   resourceBundle: 0, // never expires — static config data
+  employmentDetails: HOURS_12,
+  entitySearch: HOURS_12,
 
   //   Future modules — uncomment and set TTL:
   // roles:      60 * 60 * 1000,   // 1 hour

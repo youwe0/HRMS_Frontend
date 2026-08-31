@@ -18,6 +18,9 @@ export const API_ENDPOINTS = {
   GET_LEAVE_TYPES: "/leave-types",
   DELETE_LEAVE_TYPE: (id: number) => `/leave-types/${id}`,
   GET_RESOURCE_BUNDLE: "/resource-bundle",
+  GET_USER_DETAIL: (section: string) => `/userDetail/${section}`,
+  UPDATE_USER_DETAIL: (userId: number, section: string) =>
+    `/userDetail/${userId}/${section}`,
 } as const;
 
 export type Endpoint = (typeof API_ENDPOINTS)[keyof typeof API_ENDPOINTS];

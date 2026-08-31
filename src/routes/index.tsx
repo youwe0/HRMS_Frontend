@@ -7,6 +7,7 @@ import EmployeesPage from "@/pages/Employee_page/Employees";
 import DepartmentsPage from "@/pages/Department_page/Departments";
 import DesignationsPage from "@/pages/Designation_page/Designations";
 import LeaveTypesPage from "@/pages/LeaveType_page/LeaveTypes";
+import MyProfilePage from "@/pages/MyProfile_page/MyProfile";
 
 export function AppRoutes() {
   return (
@@ -50,6 +51,14 @@ export function AppRoutes() {
         element={
           <ProtectedLayout>
             <LeaveTypesPage />
+          </ProtectedLayout>
+        }
+      />
+      <Route
+        path="/my-profile"
+        element={
+          <ProtectedLayout>
+            <MyProfilePage />
           </ProtectedLayout>
         }
       />

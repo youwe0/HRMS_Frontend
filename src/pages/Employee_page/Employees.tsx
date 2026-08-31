@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { Loader2, UserPlus } from "lucide-react";
+import { Loader2, Pencil, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -22,6 +22,7 @@ import { API_ENDPOINTS } from "@/config/endpoints";
 import { Header } from "@/components/layout/Header";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { AddEmployeeDialog } from "@/pages/Employee_page/AddEmployeeDialog";
+import { EditEmploymentDetailsDialog } from "@/pages/Employee_page/EditEmploymentDetailsDialog";
 import { createModuleCache } from "@/lib/indexedDb";
 
 type Employee = {
@@ -53,6 +54,8 @@ export default function EmployeesPage() {
   const [employeesLoading, setEmployeesLoading] = useState(true);
   const [employeesError, setEmployeesError] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [pagination, setPagination] = useState<PaginationMeta | null>(null);
 
@@ -165,6 +168,18 @@ export default function EmployeesPage() {
           await fetchEmployees(currentPage);
         }}
       />
+      {selectedEmployee && (
+        <EditEmploymentDetailsDialog
+          open={editDialogOpen}
+          onOpenChange={setEditDialogOpen}
+          userId={selectedEmployee.userId}
+          userName={selectedEmployee.userName}
+          onUpdated={async () => {
+            await employeesCache.clear();
+            await fetchEmployees(currentPage);
+          }}
+        />
+      )}
 
       <Card className="w-full">
         <CardHeader>
@@ -215,6 +230,17 @@ export default function EmployeesPage() {
                             #{emp.userId}
                           </span>
                           <Badge variant="secondary">{emp.role}</Badge>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="size-8 shrink-0"
+                            onClick={() => {
+                              setSelectedEmployee(emp);
+                              setEditDialogOpen(true);
+                            }}
+                          >
+                            <Pencil className="size-4" />
+                          </Button>
                         </div>
                       </CardContent>
                     </Card>
