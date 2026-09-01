@@ -46,6 +46,9 @@ export const CACHE_TTL = {
   resourceBundle: 0, // never expires — static config data
   employmentDetails: HOURS_12,
   entitySearch: HOURS_12,
+  userSearch: HOURS_24,
+  departmentSearch: HOURS_24,
+  designationSearch: HOURS_24,
 
   //   Future modules — uncomment and set TTL:
   // roles:      60 * 60 * 1000,   // 1 hour

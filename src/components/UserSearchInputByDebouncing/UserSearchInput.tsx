@@ -3,7 +3,8 @@ import { Search, X, User, Building2, Award } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { api } from "@/api/client";
 import { API_ENDPOINTS } from "@/config/endpoints";
-import { cacheGet, cacheSet } from "@/lib/indexedDb";
+import { createModuleCache } from "@/lib/indexedDb";
+import type { CacheModule } from "@/lib/indexedDb";
 
 // Types
 export type EntitySearchResult = {
@@ -13,6 +14,13 @@ export type EntitySearchResult = {
 };
 
 export type SearchForType = "user" | "department" | "designation";
+
+// Consolidated IndexedDB caches — one per entity type, not per query.
+const SEARCH_CACHE_KEY: Record<SearchForType, CacheModule> = {
+  user: "userSearch",
+  department: "departmentSearch",
+  designation: "designationSearch",
+};
 
 interface UserSearchInputProps {
   // Currently selected entity ID (controlled).
@@ -52,6 +60,33 @@ export function UserSearchInput({
   const containerRef = useRef<HTMLDivElement>(null);
   const debounceTimer = useRef<ReturnType<typeof setTimeout>>(null);
 
+  // Accumulated results in memory (loaded from IndexedDB on mount).
+  const accumulatedRef = useRef<EntitySearchResult[]>([]);
+  // Tracks which search terms have already been fetched from the API.
+  const fetchedTermsRef = useRef<Set<string>>(new Set());
+  // The consolidated cache instance for this entity type.
+  const cache = createModuleCache<EntitySearchResult[]>(
+    SEARCH_CACHE_KEY[searchFor],
+  );
+
+  // Load accumulated results from IndexedDB on mount.
+  useEffect(() => {
+    let cancelled = false;
+    async function load() {
+      const cached = await cache.get();
+      if (!cancelled && cached) {
+        accumulatedRef.current = cached;
+        // Mark all existing labels as already fetched so we don't re-fetch.
+        const terms = new Set(cached.map((r) => r.label.toLowerCase()));
+        fetchedTermsRef.current = terms;
+      }
+    }
+    load();
+    return () => {
+      cancelled = true;
+    };
+  }, [cache]);
+
   //   Click-outside to close
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -66,7 +101,36 @@ export function UserSearchInput({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  //   Search logic: debounced API call with IndexedDB caching
+  // Filter accumulated results by a search term.
+  const filterCached = useCallback(
+    (term: string) => {
+      const lower = term.toLowerCase();
+      return accumulatedRef.current.filter((r) =>
+        r.label.toLowerCase().includes(lower),
+      );
+    },
+    [],
+  );
+
+  // Merge new results into the accumulated store (dedup by id).
+  const mergeAndSave = useCallback(
+    async (fetched: EntitySearchResult[]) => {
+      if (fetched.length === 0) return;
+
+      const existing = accumulatedRef.current;
+      const existingIds = new Set(existing.map((r) => r.id));
+      const newItems = fetched.filter((r) => !existingIds.has(r.id));
+
+      if (newItems.length === 0) return;
+
+      const merged = [...existing, ...newItems];
+      accumulatedRef.current = merged;
+      await cache.save(merged);
+    },
+    [cache],
+  );
+
+  //   Search logic: debounced API call with consolidated IndexedDB caching
   const doSearch = useCallback(
     async (term: string) => {
       const trimmed = term.trim();
@@ -76,16 +140,16 @@ export function UserSearchInput({
         return;
       }
 
-      const cacheKey = `search_${searchFor}_${trimmed.toLowerCase()}`;
+      // 1. Client-side filter of already-accumulated results.
+      const filtered = filterCached(trimmed);
+      setResults(filtered);
+      setOpen(true);
 
-      // Check IndexedDB cache first
-      const cached = await cacheGet<EntitySearchResult[]>(cacheKey);
-      if (cached) {
-        setResults(cached);
-        setOpen(cached.length > 0);
-        return;
-      }
+      // 2. If this exact term was already fetched from the API, we're done.
+      const lower = trimmed.toLowerCase();
+      if (fetchedTermsRef.current.has(lower)) return;
 
+      // 3. Term not yet fetched — call the API.
       setLoading(true);
       try {
         const data = await api.get<{ results: EntitySearchResult[] }>(
@@ -94,19 +158,22 @@ export function UserSearchInput({
         );
 
         const fetched = data.results ?? [];
-        setResults(fetched);
-        setOpen(fetched.length > 0);
+        fetchedTermsRef.current.add(lower);
 
-        // Save to IndexedDB cache
-        await cacheSet(cacheKey, fetched);
+        if (fetched.length > 0) {
+          // Merge into accumulated store and re-filter.
+          await mergeAndSave(fetched);
+          const updated = filterCached(trimmed);
+          setResults(updated);
+          setOpen(updated.length > 0);
+        }
       } catch {
-        setResults([]);
-        setOpen(false);
+        // Silently fail — keep showing whatever cached results we have.
       } finally {
         setLoading(false);
       }
     },
-    [searchFor],
+    [searchFor, filterCached, mergeAndSave],
   );
 
   //   Debounced input handler

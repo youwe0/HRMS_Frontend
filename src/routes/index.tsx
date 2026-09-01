@@ -8,6 +8,7 @@ import DepartmentsPage from "@/pages/Department_page/Departments";
 import DesignationsPage from "@/pages/Designation_page/Designations";
 import LeaveTypesPage from "@/pages/LeaveType_page/LeaveTypes";
 import MyProfilePage from "@/pages/MyProfile_page/MyProfile";
+import CompanyMasterConfigPage from "@/pages/CompanyMasterConfig_page/CompanyMasterConfig";
 
 export function AppRoutes() {
   return (
@@ -59,6 +60,14 @@ export function AppRoutes() {
         element={
           <ProtectedLayout>
             <MyProfilePage />
+          </ProtectedLayout>
+        }
+      />
+      <Route
+        path="/company-master-config"
+        element={
+          <ProtectedLayout>
+            <CompanyMasterConfigPage />
           </ProtectedLayout>
         }
       />

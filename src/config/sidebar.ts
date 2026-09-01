@@ -19,6 +19,7 @@ import {
   Network,
   Receipt,
   Settings,
+  SlidersHorizontal,
   ShieldCheck,
   Target,
   TrendingUp,
@@ -125,6 +126,7 @@ export const sidebarSections: SidebarSection[] = [
     label: "Administration",
     items: [
       { title: "Roles & Permissions", url: "/roles-permissions", icon: Lock },
+      { title: "Company Master Config", url: "/company-master-config", icon: SlidersHorizontal },
       { title: "Settings", url: "/settings", icon: Settings },
     ],
   },

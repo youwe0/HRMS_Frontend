@@ -7,6 +7,7 @@ export type ResourceBundle = {
   Blood_group: string[];
   Gender: string[];
   Employee_type: string[];
+  HolidayBasedOnType: string[];
 };
 
 const resourceBundleCache = createModuleCache<ResourceBundle>("resourceBundle");
