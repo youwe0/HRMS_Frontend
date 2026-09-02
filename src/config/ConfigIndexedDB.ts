@@ -49,6 +49,7 @@ export const CACHE_TTL = {
   userSearch: HOURS_24,
   departmentSearch: HOURS_24,
   designationSearch: HOURS_24,
+  companyMasterConfig: HOURS_24,
 
   //   Future modules — uncomment and set TTL:
   // roles:      60 * 60 * 1000,   // 1 hour

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Loader2, Settings, Save } from "lucide-react";
+import { Loader2, Settings, AlertCircle } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -8,94 +8,93 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Header } from "@/components/layout/Header";
 import { PageLayout } from "@/components/layout/PageLayout";
-import { useResourceBundle } from "@/hooks/useResourceBundle";
 import { api, ApiError } from "@/api/client";
 import { API_ENDPOINTS } from "@/config/endpoints";
 import { ToastContainer, useToast } from "@/components/ui/toast";
-import {
-  COMPANY_MASTER_OPTIONS,
-  type CompanyMasterOption,
-} from "@/config/CompanyMasterOptionConfig";
+import { createModuleCache } from "@/lib/indexedDb";
 
 type CompanyMasterConfigRecord = {
   id: number;
   moduleName: string;
   basedOn: string;
+  createdBy: number;
+  createdAt: string;
+  isActive: number;
 };
 
-export default function CompanyMasterConfigPage() {
-  const { data: resourceBundle, loading } = useResourceBundle();
-  const { toasts, dismiss, success, error: toastError } = useToast();
-  const [values, setValues] = useState<Record<string, string>>({});
-  const [saving, setSaving] = useState(false);
-  const [loadingConfig, setLoadingConfig] = useState(true);
+const configCache = createModuleCache<CompanyMasterConfigRecord[]>(
+  "companyMasterConfig",
+);
 
-  // Load existing configs on mount
+export default function CompanyMasterConfigPage() {
+  const { toasts, dismiss, error: toastError } = useToast();
+  const [configs, setConfigs] = useState<CompanyMasterConfigRecord[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const loadConfig = async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      // 1. Try IndexedDB first
+      const cached = await configCache.get();
+      if (cached) {
+        setConfigs(cached);
+        setLoading(false);
+
+        // Still try API in background to refresh cache
+        try {
+          const response = await api.get<{
+            configs: CompanyMasterConfigRecord[];
+          }>(API_ENDPOINTS.GET_COMPANY_MASTER_CONFIG);
+          setConfigs(response.configs);
+          await configCache.save(response.configs);
+        } catch {
+          // Background refresh failed — ignore, we have cached data
+        }
+        return;
+      }
+
+      // 2. No cache — fetch from API
+      const response = await api.get<{
+        configs: CompanyMasterConfigRecord[];
+      }>(API_ENDPOINTS.GET_COMPANY_MASTER_CONFIG);
+      setConfigs(response.configs);
+      await configCache.save(response.configs);
+    } catch (err) {
+      const msg =
+        err instanceof ApiError ? err.message : "Failed to load configuration.";
+      setError(msg);
+      toastError(msg);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     let cancelled = false;
 
-    async function loadConfig() {
-      try {
-        const response = await api.get<{
-          configs: CompanyMasterConfigRecord[];
-        }>(API_ENDPOINTS.GET_COMPANY_MASTER_CONFIG);
-        if (!cancelled && response.configs.length > 0) {
-          const map: Record<string, string> = {};
-          for (const cfg of response.configs) {
-            map[cfg.moduleName] = cfg.basedOn;
-          }
-          setValues(map);
-        }
-      } catch {
-        // Silently fail — user can still select and save
-      } finally {
-        if (!cancelled) setLoadingConfig(false);
-      }
+    async function init() {
+      if (!cancelled) await loadConfig();
     }
 
-    loadConfig();
+    init();
     return () => {
       cancelled = true;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  const handleValueChange = (moduleName: string, value: string) => {
-    setValues((prev) => ({ ...prev, [moduleName]: value }));
-  };
-
-  const handleSave = async (option: CompanyMasterOption) => {
-    const currentValue = values[option.moduleName];
-    if (!currentValue) {
-      toastError(`Please select a ${option.label} before saving.`);
-      return;
-    }
-
-    setSaving(true);
-    try {
-      await api.post(API_ENDPOINTS.UPSERT_COMPANY_MASTER_CONFIG, {
-        moduleName: option.moduleName,
-        basedOn: currentValue,
-      });
-      success(`${option.label} saved successfully.`);
-    } catch (err) {
-      const msg =
-        err instanceof ApiError ? err.message : "Failed to save configuration.";
-      toastError(msg);
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const isLoading = loading || loadingConfig;
 
   return (
     <PageLayout>
@@ -105,71 +104,64 @@ export default function CompanyMasterConfigPage() {
         showBack={true}
       />
 
-      <div className="flex flex-col gap-4 w-full">
-        {COMPANY_MASTER_OPTIONS.map((option) => (
-          <Card key={option.moduleName} className="w-full">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Settings className="size-5" />
-                {option.title}
-              </CardTitle>
-              <CardDescription>{option.description}</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {isLoading ? (
-                <div className="flex items-center justify-center py-6 text-muted-foreground">
-                  <Loader2 className="size-4 animate-spin mr-2" />
-                  Loading configuration…
-                </div>
-              ) : (
-                <div className="flex flex-col gap-4">
-                  <div className="flex flex-col gap-2">
-                    <label className="text-sm font-medium">
-                      {option.label}
-                    </label>
-                    <Select
-                      value={values[option.moduleName] ?? ""}
-                      onValueChange={(v) =>
-                        handleValueChange(option.moduleName, v)
-                      }
-                    >
-                      <SelectTrigger className="w-full max-w-sm">
-                        <SelectValue placeholder={option.placeholder} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {(resourceBundle?.[option.resourceBundleKey] ?? []).map(
-                          (type) => (
-                            <SelectItem key={type} value={type}>
-                              {type}
-                            </SelectItem>
-                          ),
-                        )}
-                      </SelectContent>
-                    </Select>
-                    <p className="text-xs text-muted-foreground">
-                      {option.helperText}
-                    </p>
-                  </div>
-
-                  <div className="flex justify-end">
-                    <Button
-                      onClick={() => handleSave(option)}
-                      disabled={saving || !values[option.moduleName]}
-                    >
-                      {saving ? (
-                        <Loader2 className="size-4 animate-spin mr-2" />
-                      ) : (
-                        <Save className="size-4 mr-2" />
-                      )}
-                      Save
-                    </Button>
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+      <Card className="w-full">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Settings className="size-5" />
+            Company Master Configuration
+          </CardTitle>
+          <CardDescription>
+            All saved company master configuration entries.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {loading ? (
+            <div className="flex items-center justify-center py-6 text-muted-foreground">
+              <Loader2 className="size-4 animate-spin mr-2" />
+              Loading configuration…
+            </div>
+          ) : error && configs.length === 0 ? (
+            <div className="flex flex-col items-center gap-3 py-6">
+              <AlertCircle className="size-8 text-destructive" />
+              <p className="text-sm text-muted-foreground text-center">
+                {error}
+              </p>
+              <Button variant="outline" size="sm" onClick={loadConfig}>
+                Retry
+              </Button>
+            </div>
+          ) : configs.length === 0 ? (
+            <p className="text-sm text-muted-foreground py-6 text-center">
+              No configuration entries found.
+            </p>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>ID</TableHead>
+                  <TableHead>Module Name</TableHead>
+                  <TableHead>Based On</TableHead>
+                  <TableHead>Created By</TableHead>
+                  <TableHead>Created At</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {configs.map((cfg) => (
+                  <TableRow key={cfg.id}>
+                    <TableCell>{cfg.id}</TableCell>
+                    <TableCell>{cfg.moduleName}</TableCell>
+                    <TableCell>{cfg.basedOn}</TableCell>
+                    <TableCell>{cfg.createdBy}</TableCell>
+                    <TableCell>
+                      {new Date(cfg.createdAt).toLocaleDateString()}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
 
       <ToastContainer toasts={toasts} onDismiss={dismiss} />
     </PageLayout>

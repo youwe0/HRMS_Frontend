@@ -7,6 +7,9 @@ import {
   CalendarOff,
   Home,
   Menu,
+  Settings,
+  UserCircle,
+  Users,
   X,
 } from "lucide-react";
 
@@ -19,8 +22,12 @@ const BOTTOM_NAV_ITEMS = [
 ] as const;
 
 const MENU_ITEMS = [
+  { title: "Employees", url: "/employees", icon: Users },
   { title: "Departments", url: "/departments", icon: Building2 },
   { title: "Designations", url: "/designations", icon: Briefcase },
+  { title: "Leave Types", url: "/leave", icon: CalendarOff },
+  { title: "My Profile", url: "/my-profile", icon: UserCircle },
+  { title: "Company Master Config", url: "/company-master-config", icon: Settings },
 ] as const;
 
 export function BottomNav() {
