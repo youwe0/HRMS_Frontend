@@ -21,6 +21,8 @@ export const API_ENDPOINTS = {
   GET_USER_DETAIL: (section: string) => `/userDetail/${section}`,
   UPDATE_USER_DETAIL: (userId: number, section: string) =>
     `/userDetail/${userId}/${section}`,
+  UPSERT_COMPANY_MASTER_CONFIG: "/company-master-config",
+  GET_COMPANY_MASTER_CONFIG: "/company-master-config",
 } as const;
 
 export type Endpoint = (typeof API_ENDPOINTS)[keyof typeof API_ENDPOINTS];
