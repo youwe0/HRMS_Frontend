@@ -23,6 +23,8 @@ export const API_ENDPOINTS = {
     `/userDetail/${userId}/${section}`,
   UPSERT_COMPANY_MASTER_CONFIG: "/company-master-config",
   GET_COMPANY_MASTER_CONFIG: "/company-master-config",
+  MAKE_ATTENDANCE: (userId: number) => `/attendance/${userId}`,
+  GET_ATTENDANCE: (userId: number) => `/attendance/${userId}`,
 } as const;
 
 export type Endpoint = (typeof API_ENDPOINTS)[keyof typeof API_ENDPOINTS];
