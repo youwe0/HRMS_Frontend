@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import {
-  Loader2,
   ChevronLeft,
   ChevronRight,
   CalendarDays,
@@ -25,6 +24,7 @@ import { Badge } from "@/components/ui/badge";
 import { api } from "@/api/client";
 import { API_ENDPOINTS } from "@/config/endpoints";
 import { decodeTokenPayload } from "@/lib/utils";
+import { Skeleton } from "@/components/ui/skeleton";
 
 type AttendanceRecord = {
   employeeCode: string;
@@ -207,9 +207,31 @@ export function ShowAttendance() {
 
         {/* Attendance Table */}
         {loading ? (
-          <div className="flex items-center justify-center py-6 text-muted-foreground">
-            <Loader2 className="size-4 animate-spin mr-2" />
-            Loading attendance…
+          <div className="py-2">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Date</TableHead>
+                  <TableHead>Day</TableHead>
+                  <TableHead>Clock In</TableHead>
+                  <TableHead>Clock Out</TableHead>
+                  <TableHead>Shift</TableHead>
+                  <TableHead>Status</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <TableRow key={i}>
+                    <TableCell><Skeleton className="h-4 w-28" /></TableCell>
+                    <TableCell><Skeleton className="h-4 w-12" /></TableCell>
+                    <TableCell><Skeleton className="h-4 w-20" /></TableCell>
+                    <TableCell><Skeleton className="h-4 w-20" /></TableCell>
+                    <TableCell><Skeleton className="h-4 w-16" /></TableCell>
+                    <TableCell><Skeleton className="h-5 w-16 rounded-full" /></TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           </div>
         ) : error ? (
           <div className="rounded-lg border border-destructive/50 bg-destructive/10 px-3 py-2 text-sm text-destructive">

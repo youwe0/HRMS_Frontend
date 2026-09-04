@@ -1,6 +1,6 @@
 # Frontend Architecture
 
-> **Last Updated:** 2026-09-02  
+> **Last Updated:** 2026-09-04  
 > **Stack:** Vite 8 + React 19 + TypeScript 6 + Tailwind CSS v4 + shadcn/ui + lucide-react  
 > **Dev Server:** `localhost:5173` (proxies `/api` → `localhost:5000`)
 
@@ -445,6 +445,8 @@ src/
 |---|---|---|
 | `employees` | 12 hours | After add/edit employee — `cache.clear()` then re-fetch |
 
+**Loading State:** Uses shadcn/ui `<Skeleton>` component to render 6 placeholder cards matching the employee card layout (circular avatar, name, ID, role badge, edit button).
+
 **Variables:**
 | Variable | Type | Description |
 |---|---|---|
@@ -487,6 +489,8 @@ src/
 | `editDialogOpen` | boolean | Edit department dialog state |
 | `deleteDialogOpen` | boolean | Delete department dialog state |
 
+**Loading State:** Uses shadcn/ui `<Skeleton>` component to render 5 skeleton table rows matching the department table layout (ID, department name, status badge, edit/delete buttons).
+
 **Refetch:** On create, edit, or delete — clears cache and force-refreshes.
 
 ---
@@ -512,6 +516,8 @@ src/
 | Cache Module | TTL | Refetch Trigger |
 |---|---|---|
 | `designations` | 24 hours | After create/delete — cache cleared and re-fetched |
+
+**Loading State:** Uses shadcn/ui `<Skeleton>` component to render 5 skeleton table rows matching the designation table layout (ID, designation name, status badge, delete button).
 
 **Variables:**
 | Variable | Type | Description |
@@ -544,6 +550,8 @@ src/
 |---|---|---|
 | `leaveTypes` | 24 hours | After create/delete — cache cleared and re-fetched |
 
+**Loading State:** Uses shadcn/ui `<Skeleton>` component to render 5 skeleton table rows matching the leave type table layout (leave name, code badge, applicable for, status badge, delete button).
+
 **Pagination:** Uses IntersectionObserver for infinite scroll (not traditional pagination).
 
 **Variables:**
@@ -569,6 +577,8 @@ src/
 |---|---|---|
 | `GET` | `/api/userDetail/employment-details` | Fetch employment details for current user |
 
+**Loading State:** Uses shadcn/ui `<Skeleton>` component to render a 2-column grid of 6 skeleton field placeholders (label + value) matching the profile layout.
+
 **Caching:**
 | Cache Module | TTL | Refetch Trigger |
 |---|---|---|
@@ -589,6 +599,8 @@ src/
 |---|---|---|
 | `GET` | `/api/company-master-config` | Fetch all config records |
 | `POST` | `/api/company-master-config` | Create or update config record |
+
+**Loading State:** Uses shadcn/ui `<Skeleton>` component to render 5 skeleton table rows matching the config table layout (ID, module name, based on, created by, created at).
 
 **Caching:**
 | Cache Module | TTL | Refetch Trigger |
@@ -672,6 +684,8 @@ src/
 1. Default → shows "Clock In" (calls POST, gets `clock_in` action)
 2. After clock-in → shows "Clock Out" (calls POST, gets `clock_out` action)
 3. After clock-out → shows "Completed for Today" (disabled, 409 response)
+
+**Loading State:** Uses shadcn/ui `<Skeleton>` component to render 5 skeleton table rows matching the attendance table layout (date, day, clock in, clock out, shift, status badge).
 
 **Refetch:** Attendance history refetches when month/year changes.
 

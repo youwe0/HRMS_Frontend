@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { Loader2, Building2, Trash2, Pencil } from "lucide-react";
+import { Building2, Trash2, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -25,6 +25,7 @@ import { AddDepartmentDialog } from "@/pages/Department_page/AddDepartmentDialog
 import { DeleteDepartmentDialog } from "@/pages/Department_page/DeleteDepartmentDialog";
 import { EditDepartmentDialog } from "@/pages/Department_page/EditDepartmentDialog";
 import { createModuleCache } from "@/lib/indexedDb";
+import { Skeleton } from "@/components/ui/skeleton";
 
 type Department = {
   id: number;
@@ -137,9 +138,32 @@ export default function DepartmentsPage() {
         </CardHeader>
         <CardContent>
           {loading ? (
-            <div className="flex items-center justify-center py-6 text-muted-foreground">
-              <Loader2 className="size-4 animate-spin mr-2" />
-              Loading departments…
+            <div className="py-2">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>ID</TableHead>
+                    <TableHead>Department</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <TableRow key={i}>
+                      <TableCell><Skeleton className="h-4 w-8" /></TableCell>
+                      <TableCell><Skeleton className="h-4 w-40" /></TableCell>
+                      <TableCell><Skeleton className="h-5 w-16 rounded-full" /></TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex items-center justify-end gap-1">
+                          <Skeleton className="size-8 rounded-md" />
+                          <Skeleton className="size-8 rounded-md" />
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
             </div>
           ) : error ? (
             <div className="rounded-lg border border-destructive/50 bg-destructive/10 px-3 py-2 text-sm text-destructive">

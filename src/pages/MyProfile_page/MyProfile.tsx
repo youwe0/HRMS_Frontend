@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { Loader2, Briefcase } from "lucide-react";
+import { Briefcase } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -13,6 +13,7 @@ import { PageLayout } from "@/components/layout/PageLayout";
 import { api } from "@/api/client";
 import { API_ENDPOINTS } from "@/config/endpoints";
 import { createModuleCache } from "@/lib/indexedDb";
+import { Skeleton } from "@/components/ui/skeleton";
 
 type EmploymentDetails = {
   id: number;
@@ -103,9 +104,13 @@ export default function MyProfilePage() {
         </CardHeader>
         <CardContent>
           {loading ? (
-            <div className="flex items-center justify-center py-6 text-muted-foreground">
-              <Loader2 className="size-4 animate-spin mr-2" />
-              Loading employment details…
+            <div className="grid gap-6 sm:grid-cols-2">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="space-y-2">
+                  <Skeleton className="h-3 w-28" />
+                  <Skeleton className="h-5 w-40" />
+                </div>
+              ))}
             </div>
           ) : error ? (
             <div className="rounded-lg border border-destructive/50 bg-destructive/10 px-3 py-2 text-sm text-destructive">

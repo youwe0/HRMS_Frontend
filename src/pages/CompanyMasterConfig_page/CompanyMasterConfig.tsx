@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Loader2, Settings, AlertCircle } from "lucide-react";
+import { Settings, AlertCircle } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -22,6 +22,7 @@ import { api, ApiError } from "@/api/client";
 import { API_ENDPOINTS } from "@/config/endpoints";
 import { ToastContainer, useToast } from "@/components/ui/toast";
 import { createModuleCache } from "@/lib/indexedDb";
+import { Skeleton } from "@/components/ui/skeleton";
 
 type CompanyMasterConfigRecord = {
   id: number;
@@ -116,9 +117,29 @@ export default function CompanyMasterConfigPage() {
         </CardHeader>
         <CardContent>
           {loading ? (
-            <div className="flex items-center justify-center py-6 text-muted-foreground">
-              <Loader2 className="size-4 animate-spin mr-2" />
-              Loading configuration…
+            <div className="py-2">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>ID</TableHead>
+                    <TableHead>Module Name</TableHead>
+                    <TableHead>Based On</TableHead>
+                    <TableHead>Created By</TableHead>
+                    <TableHead>Created At</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <TableRow key={i}>
+                      <TableCell><Skeleton className="h-4 w-8" /></TableCell>
+                      <TableCell><Skeleton className="h-4 w-36" /></TableCell>
+                      <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                      <TableCell><Skeleton className="h-4 w-16" /></TableCell>
+                      <TableCell><Skeleton className="h-4 w-28" /></TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
             </div>
           ) : error && configs.length === 0 ? (
             <div className="flex flex-col items-center gap-3 py-6">

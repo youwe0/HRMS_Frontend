@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { Loader2, Briefcase, Trash2 } from "lucide-react";
+import { Briefcase, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -24,6 +24,7 @@ import { PageLayout } from "@/components/layout/PageLayout";
 import { AddDesignationDialog } from "@/pages/Designation_page/AddDesignationDialog";
 import { DeleteDesignationDialog } from "@/pages/Designation_page/DeleteDesignationDialog";
 import { createModuleCache } from "@/lib/indexedDb";
+import { Skeleton } from "@/components/ui/skeleton";
 
 type Designation = {
   id: number;
@@ -131,9 +132,29 @@ export default function DesignationsPage() {
         </CardHeader>
         <CardContent>
           {loading ? (
-            <div className="flex items-center justify-center py-6 text-muted-foreground">
-              <Loader2 className="size-4 animate-spin mr-2" />
-              Loading designations…
+            <div className="py-2">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>ID</TableHead>
+                    <TableHead>Designation</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <TableRow key={i}>
+                      <TableCell><Skeleton className="h-4 w-8" /></TableCell>
+                      <TableCell><Skeleton className="h-4 w-40" /></TableCell>
+                      <TableCell><Skeleton className="h-5 w-16 rounded-full" /></TableCell>
+                      <TableCell className="text-right">
+                        <Skeleton className="size-8 rounded-md" />
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
             </div>
           ) : error ? (
             <div className="rounded-lg border border-destructive/50 bg-destructive/10 px-3 py-2 text-sm text-destructive">
