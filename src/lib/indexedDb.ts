@@ -123,6 +123,29 @@ export async function cacheClearAll(): Promise<void> {
   }
 }
 
+/**
+ * Delete all cached entries **except** the ones whose keys are in `keepKeys`.
+ * Useful for logout: clear user-specific data while preserving static config.
+ */
+export async function cacheClearAllExcept(
+  keepKeys: string[],
+): Promise<void> {
+  try {
+    const db = await getDb();
+    const tx = db.transaction(IDB_STORE_NAME, "readwrite");
+    const store = tx.objectStore(IDB_STORE_NAME);
+    const keys = (await store.getAllKeys()) as string[];
+    for (const key of keys) {
+      if (!keepKeys.includes(key)) {
+        await store.delete(key);
+      }
+    }
+    await tx.done;
+  } catch {
+    // Best-effort.
+  }
+}
+
 // ── Module factory ────────────────────────────────────────────────────────────
 
 /**

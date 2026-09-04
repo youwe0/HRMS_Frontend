@@ -5,6 +5,7 @@ import { Building2, LogOut, Moon, Sun } from "lucide-react";
 import { APP_NAME } from "@/config";
 import { sidebarSections } from "@/config/sidebar";
 import { setAuthToken } from "@/api/client";
+import { cacheClearAllExcept } from "@/lib/indexedDb";
 import {
   Dialog,
   DialogClose,
@@ -165,7 +166,9 @@ export function AppSidebar() {
                 <DialogClose asChild>
                   <Button
                     variant="destructive"
-                    onClick={() => {
+                    onClick={async () => {
+                      // Clear all cached data except the static resource bundle
+                      await cacheClearAllExcept(["resourceBundle_all"]);
                       setAuthToken(null);
                       navigate("/login", { replace: true });
                     }}

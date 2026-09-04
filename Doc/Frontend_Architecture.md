@@ -201,6 +201,7 @@ src/
 | `cacheSet<T>(key, data, decayMs?)` | function | Write data to cache with TTL. |
 | `cacheClear(key)` | function | Delete a single cache entry. |
 | `cacheClearAll()` | function | Delete all cache entries. |
+| `cacheClearAllExcept(keepKeys)` | function | Delete all entries except those whose keys are in `keepKeys`. Used on logout to preserve the resource bundle. |
 | `createModuleCache<T>(moduleName)` | function | Factory — creates typed `get/save/clear` helpers for a module. |
 | `ModuleCache<T>` | type | `{ get, save, clear }` — scoped cache interface. |
 
@@ -755,3 +756,5 @@ All protected routes are wrapped with `<ProtectedLayout>` which checks for JWT t
 | Desig Search | `designationSearch_all` | 24h | IndexedDB (accumulated) | Each unique search term |
 | Attendance | — | — | No cache | Always fresh (month/year change) |
 | Dashboard | — | — | No cache | N/A (dummy data) |
+
+**Logout behaviour:** On logout, `cacheClearAllExcept(["resourceBundle_all"])` is called — all cached entries are deleted from IndexedDB except the resource bundle (static config data that never changes). This prevents stale user-specific data from leaking into a new session.
