@@ -19,7 +19,8 @@
    - [Crypto](#27-crypto--libcryptots)
    - [Utilities](#28-utilities--libutilsts)
    - [Resource Bundle Hook](#29-resource-bundle-hook--hooksuseresourcebundlets)
-   - [User Search Input](#210-user-search-input--componentsusersearchinputbydebouncingusersearchinputtsx)
+   - [Connection Lost Overlay](#211-connection-lost-overlay--componentsapputilitycomponentsconnectionlosttsx)
+   - [User Search Input](#212-user-search-input--componentsusersearchinputbydebouncingusersearchinputtsx)
 3. [Layout Components](#3-layout-components)
 4. [Page Modules](#4-page-modules)
    - [Login](#41-login-module)
@@ -317,7 +318,32 @@ src/
 
 ---
 
-### 2.11 User Search Input — `components/UserSearchInputByDebouncing/UserSearchInput.tsx`
+### 2.11 Connection Lost Overlay — `components/ApputilityComponents/ConnectionLost.tsx`
+
+**Purpose:** Full-screen overlay that detects browser online/offline status and shows a branded "Connection Lost" page when the user loses internet connectivity.
+
+**Files:**
+| File | Purpose |
+|---|---|
+| `components/ApputilityComponents/ConnectionLost.tsx` | Connection lost overlay — listens to `online`/`offline` events |
+| `main.tsx` | Renders `<ConnectionLost />` above the app tree |
+
+**How it works:**
+1. `ConnectionLost` reads `navigator.onLine` on mount and listens to `window` `online`/`offline` events.
+2. When offline (`isOnline === false`), renders a full-screen overlay with `fixed inset-0 z-[9999]` and `bg-background/95 backdrop-blur-sm`.
+3. When back online, returns `null` (no overlay shown).
+4. Shows a `WifiOff` icon, "Connection Lost" heading, and a descriptive message.
+
+**Key behaviour:**
+- Uses `navigator.onLine` + `online`/`offline` window events for detection
+- Renders at `z-[9999]` to sit above all other UI (below `AppLoader` at mount time)
+- Respects dark/light mode (uses Tailwind `bg-background`, `text-muted-foreground`, etc.)
+- Uses `lucide-react` icons: `WifiOff` for offline indicator, `Building2` for branding
+- Auto-hides when connection returns (no manual dismiss needed)
+
+---
+
+### 2.12 User Search Input — `components/UserSearchInputByDebouncing/UserSearchInput.tsx`
 
 **Purpose:** Reusable autocomplete search component with debounced API calls and IndexedDB caching. Supports searching users, departments, and designations.
 

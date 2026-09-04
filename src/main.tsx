@@ -6,10 +6,12 @@ import App from "./App.tsx";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/components/ApputilityComponents/theme-provider.tsx";
 import { AppLoader } from "@/components/ApputilityComponents/AppLoader.tsx";
+import { ConnectionLost } from "@/components/ApputilityComponents/ConnectionLost";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <AppLoader />
+    <ConnectionLost />
     <BrowserRouter>
       <ThemeProvider>
         <TooltipProvider>
