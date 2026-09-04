@@ -20,7 +20,8 @@
    - [Utilities](#28-utilities--libutilsts)
    - [Resource Bundle Hook](#29-resource-bundle-hook--hooksuseresourcebundlets)
    - [Connection Lost Overlay](#211-connection-lost-overlay--componentsapputilitycomponentsconnectionlosttsx)
-   - [User Search Input](#212-user-search-input--componentsusersearchinputbydebouncingusersearchinputtsx)
+   - [Logout Dialog](#212-logout-dialog--componentsapputilitycomponentslogoutdialogtsx)
+   - [User Search Input](#213-user-search-input--componentsusersearchinputbydebouncingusersearchinputtsx)
 3. [Layout Components](#3-layout-components)
 4. [Page Modules](#4-page-modules)
    - [Login](#41-login-module)
@@ -344,7 +345,24 @@ src/
 
 ---
 
-### 2.12 User Search Input — `components/UserSearchInputByDebouncing/UserSearchInput.tsx`
+### 2.12 Logout Dialog — `components/ApputilityComponents/LogoutDialog.tsx`
+
+**Purpose:** Reusable logout confirmation dialog. Handles cache cleanup, token removal, and navigation internally.
+
+| Prop | Type | Default | Description |
+|---|---|---|---|
+| `children` | `React.ReactNode` | — | Trigger element (button, menu item, etc.) |
+
+**How it works:**
+1. Wraps children in a shadcn `Dialog` — clicking the child opens the confirmation dialog.
+2. On confirm: calls `cacheClearAllExcept(["resourceBundle_all"])`, removes token from `localStorage`, navigates to `/login`.
+3. On cancel: closes the dialog.
+
+**Used by:** `AppSidebar.tsx` (desktop sidebar), `BottomNav.tsx` (mobile slide-up menu).
+
+---
+
+### 2.13 User Search Input — `components/UserSearchInputByDebouncing/UserSearchInput.tsx`
 
 **Purpose:** Reusable autocomplete search component with debounced API calls and IndexedDB caching. Supports searching users, departments, and designations.
 
@@ -385,6 +403,8 @@ src/
 - **Purpose:** Mobile bottom navigation bar (shown below `md`).
 - Shows 3 main items: Home, Attendance, Leave.
 - Slide-up menu with additional pages (Employees, Departments, etc.).
+- Includes theme toggle (Moon/Sun) and logout button in the slide-up menu.
+- Logout clears IndexedDB cache (except resource bundle), removes token, navigates to `/login`.
 - `BOTTOM_NAV_ITEMS` — main bar items.
 - `MENU_ITEMS` — slide-up menu items (add new pages here).
 

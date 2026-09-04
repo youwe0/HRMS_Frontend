@@ -6,14 +6,19 @@ import {
   CalendarDays,
   CalendarOff,
   Home,
+  LogOut,
   Menu,
+  Moon,
   Settings,
+  Sun,
   UserCircle,
   Users,
   X,
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+import { useTheme } from "@/components/ApputilityComponents/theme-provider";
+import { LogoutDialog } from "@/components/ApputilityComponents/LogoutDialog";
 
 const BOTTOM_NAV_ITEMS = [
   { title: "Home", url: "/dashboard", icon: Home },
@@ -33,6 +38,7 @@ const MENU_ITEMS = [
 export function BottomNav() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { theme, toggleTheme } = useTheme();
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
@@ -83,6 +89,35 @@ export function BottomNav() {
               </button>
             );
           })}
+
+          {/* Separator */}
+          <div className="my-2 border-t border-border" />
+
+          {/* Action buttons row */}
+          <div className="flex items-center gap-5">
+            {/* Logout with confirmation dialog */}
+            <LogoutDialog>
+              <button
+                className="flex flex-1 items-center justify-center gap-2 rounded-lg px-3 py-3 text-sm font-medium text-destructive transition-colors hover:bg-destructive/10"
+              >
+                <LogOut className="size-5" />
+                Logout
+              </button>
+            </LogoutDialog>
+
+            {/* Theme toggle */}
+            <button
+              onClick={toggleTheme}
+              className="flex flex-1 items-center justify-center gap-2 rounded-lg px-3 py-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            >
+              {theme === "dark" ? (
+                <Sun className="size-5" />
+              ) : (
+                <Moon className="size-5" />
+              )}
+              {theme === "dark" ? "Light" : "Dark"}
+            </button>
+          </div>
         </div>
       </div>
 

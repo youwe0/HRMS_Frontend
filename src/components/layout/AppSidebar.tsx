@@ -1,22 +1,10 @@
 import { useEffect, useRef, useState, type RefObject } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Building2, LogOut, Moon, Sun } from "lucide-react";
 
 import { APP_NAME } from "@/config";
 import { sidebarSections } from "@/config/sidebar";
-import { setAuthToken } from "@/api/client";
-import { cacheClearAllExcept } from "@/lib/indexedDb";
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
+import { LogoutDialog } from "@/components/ApputilityComponents/LogoutDialog";
 import {
   Sidebar,
   SidebarContent,
@@ -76,7 +64,6 @@ function useContentOverflow(ref: RefObject<HTMLElement | null>) {
 export function AppSidebar() {
   const { setOpen } = useSidebar();
   const { theme, toggleTheme } = useTheme();
-  const navigate = useNavigate();
 
   const contentRef = useRef<HTMLDivElement>(null);
   const contentOverflows = useContentOverflow(contentRef);
@@ -142,43 +129,15 @@ export function AppSidebar() {
 
       <SidebarFooter className="gap-1">
         <div className="flex flex-col items-stretch gap-1 sm:flex-row sm:group-data-[collapsible=icon]:flex-col">
-          <Dialog>
-            <DialogTrigger asChild>
-              <SidebarMenuButton
-                tooltip="Logout"
-                className="w-auto! flex-1 group-data-[collapsible=icon]:flex-none"
-              >
-                <LogOut />
-                <span>Logout</span>
-              </SidebarMenuButton>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Confirm Logout</DialogTitle>
-                <DialogDescription>
-                  Are you sure you want to log out? You will need to sign in again to access your account.
-                </DialogDescription>
-              </DialogHeader>
-              <DialogFooter>
-                <DialogClose asChild>
-                  <Button variant="outline">Cancel</Button>
-                </DialogClose>
-                <DialogClose asChild>
-                  <Button
-                    variant="destructive"
-                    onClick={async () => {
-                      // Clear all cached data except the static resource bundle
-                      await cacheClearAllExcept(["resourceBundle_all"]);
-                      setAuthToken(null);
-                      navigate("/login", { replace: true });
-                    }}
-                  >
-                    Logout
-                  </Button>
-                </DialogClose>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+          <LogoutDialog>
+            <SidebarMenuButton
+              tooltip="Logout"
+              className="w-auto! flex-1 group-data-[collapsible=icon]:flex-none"
+            >
+              <LogOut />
+              <span>Logout</span>
+            </SidebarMenuButton>
+          </LogoutDialog>
 
           <SidebarMenuButton
             tooltip={
