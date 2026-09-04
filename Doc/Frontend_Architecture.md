@@ -410,7 +410,7 @@ src/
 **Files:**
 | File | Purpose |
 |---|---|
-| `Login.tsx` | Login form — username + password, SHA-256 pre-hashing, JWT storage |
+| `Login.tsx` | Login form — username + password (with show/hide toggle), SHA-256 pre-hashing, JWT storage |
 
 **API Endpoints:**
 | Method | Endpoint | Description |
@@ -424,6 +424,7 @@ src/
 | `password` | string | Password input (hashed with SHA-256 before sending) |
 | `passwordHash` | string | SHA-256 hash sent to backend |
 | `token` | string | JWT token stored in localStorage |
+| `showPassword` | boolean | Toggles password visibility (Eye/EyeOff icon button) |
 | `sessionExpired` | boolean | From URL param `?session_expired=1` |
 
 **Caching:** Calls `useResourceBundle()` on mount to pre-cache lookup data.
