@@ -13,7 +13,7 @@ import {
 import { ToastContainer, useToast } from "@/components/ui/toast";
 import { api } from "@/api/client";
 import { API_ENDPOINTS } from "@/config/endpoints";
-import { UserSearchInput } from "@/components/UserSearchInputByDebouncing/UserSearchInput";
+import { UserSearchInput } from "@/components/ApputilityComponents/SearchOnDebounce";
 
 interface AddDepartmentDialogProps {
   open: boolean;
