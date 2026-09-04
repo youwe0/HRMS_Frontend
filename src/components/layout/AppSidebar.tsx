@@ -30,7 +30,7 @@ import {
   SidebarSeparator,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { useTheme } from "@/components/theme-provider";
+import { useTheme } from "@/components/ApputilityComponents/theme-provider";
 
 // Application sidebar.
 // Collapsed by default (icons only). Hovering over it expands it to show

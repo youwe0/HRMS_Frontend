@@ -293,7 +293,31 @@ src/
 
 ---
 
-### 2.10 User Search Input — `components/UserSearchInputByDebouncing/UserSearchInput.tsx`
+### 2.10 Loading Screen — `components/AppLoader.tsx`
+
+**Purpose:** Shows a loading screen on page load and fades out once the app is ready.
+
+**Files:**
+| File | Purpose |
+|---|---|
+| `components/AppLoader.tsx` | Loading screen component — Tailwind-styled spinner, HRMS branding |
+| `main.tsx` | Renders `<AppLoader />` alongside the app |
+
+**How it works:**
+1. `AppLoader` renders a full-screen overlay with `fixed inset-0 z-[9999]` and `bg-background`.
+2. Uses Tailwind `transition-opacity duration-300` for smooth fade-out.
+3. After 300ms, the component sets `visible = false` and unmounts.
+4. Respects dark/light mode via Tailwind's `dark:` variant (inherits from `.dark` class on `<html>`).
+
+**Key behaviour:**
+- Respects dark/light mode (uses `bg-background`, `text-primary-foreground`, etc.)
+- Smooth 300ms fade-out transition
+- Component unmounts after animation (no leftover elements)
+- Uses `lucide-react` icons: `Building2` for logo, `Loader2` for spinner
+
+---
+
+### 2.11 User Search Input — `components/UserSearchInputByDebouncing/UserSearchInput.tsx`
 
 **Purpose:** Reusable autocomplete search component with debounced API calls and IndexedDB caching. Supports searching users, departments, and designations.
 
