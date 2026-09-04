@@ -13,7 +13,7 @@ export function AppLoader() {
   if (!visible) return null;
 
   return (
-    <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center gap-6 bg-background transition-opacity duration-300 animate-in fade-in">
+    <div className="fixed inset-0 z-999 flex flex-col items-center justify-center gap-6 bg-background transition-opacity duration-300 animate-in fade-in">
       <div className="flex size-12 items-center justify-center rounded-xl bg-primary text-primary-foreground">
         <Building2 className="size-6" />
       </div>
