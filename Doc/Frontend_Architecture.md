@@ -156,32 +156,37 @@ src/
 
 ### 2.3 Endpoints — `config/endpoints.ts`
 
-**Purpose:** Single source of truth for all API endpoint paths. Every page imports from here — never hardcode paths.
+**Purpose:** Single source of truth for all API endpoint paths. Every page imports from here — never hardcode paths. Organized by backend modules.
 
-| Export | Value | Used By |
-|---|---|---|
-| `REGISTER` | `"/auth/register"` | Login (future) |
-| `LOGIN` | `"/auth/login"` | Login |
-| `GET_EMPLOYEES` | `"/employees"` | Employees |
-| `CREATE_DEPARTMENT` | `"/departments"` | AddDepartmentDialog |
-| `GET_DEPARTMENTS` | `"/departments"` | Departments |
-| `DELETE_DEPARTMENT(id)` | `` `/departments/${id}` `` | DeleteDepartmentDialog |
-| `SEARCH_USERS` | `"/users/search"` | UserSearchInput |
-| `CREATE_DESIGNATION` | `"/designations"` | AddDesignationDialog |
-| `GET_DESIGNATIONS` | `"/designations"` | Designations |
-| `DELETE_DESIGNATION(id)` | `` `/designations/${id}` `` | DeleteDesignationDialog |
-| `CREATE_LEAVE_TYPE` | `"/leave-types"` | AddLeaveTypeDialog |
-| `GET_LEAVE_TYPES` | `"/leave-types"` | LeaveTypes |
-| `DELETE_LEAVE_TYPE(id)` | `` `/leave-types/${id}` `` | DeleteLeaveTypeDialog |
-| `GET_RESOURCE_BUNDLE` | `"/resource-bundle"` | useResourceBundle hook |
-| `GET_USER_DETAIL(section)` | `` `/userDetail/${section}` `` | MyProfile |
-| `UPDATE_USER_DETAIL(userId, section)` | `` `/userDetail/${userId}/${section}` `` | EditEmploymentDetailsDialog |
-| `UPSERT_COMPANY_MASTER_CONFIG` | `"/company-master-config"` | CompanyMasterConfig |
-| `GET_COMPANY_MASTER_CONFIG` | `"/company-master-config"` | CompanyMasterConfig |
-| `MAKE_ATTENDANCE(userId)` | `` `/attendance/${userId}` `` | MakeAttendance |
-| `GET_ATTENDANCE(userId)` | `` `/attendance/${userId}` `` | ShowAttendance |
-| `SYNC_PERMISSIONS` | `"/permissions"` | SyncPermissionsDialog |
-| `GET_PERMISSIONS` | `"/permissions"` | RolesPermissions |
+| Module | Export | Value | Description |
+|---|---|---|---|
+| Auth | `REGISTER` | `"/auth/register"` | Register a new user account |
+| Auth | `LOGIN` | `"/auth/login"` | Authenticate a user and receive a JWT access token |
+| Employee | `GET_EMPLOYEES` | `"/employees"` | Retrieve a paginated list of employees |
+| Department | `CREATE_DEPARTMENT` | `"/departments"` | Create a new department |
+| Department | `GET_DEPARTMENTS` | `"/departments"` | Retrieve a paginated list of departments |
+| Department | `DELETE_DEPARTMENT(id)` | `` `/departments/${id}` `` | Soft-delete a department by setting IsActive to 0 |
+| Designation | `CREATE_DESIGNATION` | `"/designations"` | Create a new designation |
+| Designation | `GET_DESIGNATIONS` | `"/designations"` | Retrieve a paginated list of designations |
+| Designation | `DELETE_DESIGNATION(id)` | `` `/designations/${id}` `` | Soft-delete a designation by setting IsActive to 0 |
+| Leave Type | `CREATE_LEAVE_TYPE` | `"/leave-types"` | Create a new leave type |
+| Leave Type | `GET_LEAVE_TYPES` | `"/leave-types"` | Retrieve a paginated list of leave types |
+| Leave Type | `DELETE_LEAVE_TYPE(id)` | `` `/leave-types/${id}` `` | Soft-delete a leave type by ID |
+| User | `SEARCH_USERS` | `"/users/search"` | Generalized entity search for autocomplete |
+| User Detail | `GET_USER_DETAIL(section)` | `` `/userDetail/${section}` `` | Retrieve user detail data based on section |
+| User Detail | `UPDATE_USER_DETAIL(userId, section)` | `` `/userDetail/${userId}/${section}` `` | Upsert (create or update) user detail data |
+| Resource Bundle | `GET_RESOURCE_BUNDLE` | `"/resource-bundle"` | Retrieve dropdown/lookup options |
+| Company Master Config | `UPSERT_COMPANY_MASTER_CONFIG` | `"/company-master-config"` | Upsert a company master config record |
+| Company Master Config | `GET_COMPANY_MASTER_CONFIG` | `"/company-master-config"` | Retrieve all active company master config records |
+| Attendance | `MAKE_ATTENDANCE(userId)` | `` `/attendance/${userId}` `` | Record a clock-in or clock-out event |
+| Attendance | `GET_ATTENDANCE(userId)` | `` `/attendance/${userId}` `` | Retrieve attendance records for a date range |
+| Permission | `SYNC_PERMISSIONS` | `"/permissions"` | Bulk-sync permissions (insert/update by code) |
+| Permission | `CREATE_PERMISSION` | `"/permissions/create"` | Create a single new permission |
+| Permission | `GET_PERMISSIONS` | `"/permissions"` | Retrieve a paginated list of all permissions |
+| Permission | `UPDATE_PERMISSION(id)` | `` `/permissions/${id}` `` | Update an existing permission by ID |
+| Permission | `DELETE_PERMISSION(id)` | `` `/permissions/${id}` `` | Delete a permission by ID |
+| Permission | `ASSIGN_USER_PERMISSIONS(userId)` | `` `/users/${userId}/permissions` `` | Assign permissions to a user (replaces existing) |
+| Permission | `GET_USER_PERMISSIONS(userId)` | `` `/users/${userId}/permissions` `` | Retrieve permissions assigned to a user |
 
 ---
 
