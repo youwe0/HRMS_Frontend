@@ -30,6 +30,8 @@ export const API_ENDPOINTS = {
   GET_PERMISSIONS: "/permissions",
   UPDATE_PERMISSION: (id: number) => `/permissions/${id}`,
   DELETE_PERMISSION: (id: number) => `/permissions/${id}`,
+  ASSIGN_USER_PERMISSIONS: (userId: number | string) => `/users/${userId}/permissions`,
+  GET_USER_PERMISSIONS: (userId: number | string) => `/users/${userId}/permissions`,
 } as const;
 
 export type Endpoint = (typeof API_ENDPOINTS)[keyof typeof API_ENDPOINTS];

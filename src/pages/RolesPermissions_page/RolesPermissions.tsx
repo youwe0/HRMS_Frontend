@@ -26,6 +26,7 @@ import {
   type PermissionData,
 } from "@/pages/RolesPermissions_page/AddPermissionDialog";
 import { DeletePermissionDialog } from "@/pages/RolesPermissions_page/DeletePermissionDialog";
+import { GivePermissionDialog } from "@/pages/RolesPermissions_page/GivePermissionDialog";
 import { createModuleCache } from "@/lib/indexedDb";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -65,6 +66,7 @@ export default function RolesPermissionsPage() {
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [givePermissionDialogOpen, setGivePermissionDialogOpen] = useState(false);
   const [selectedPerm, setSelectedPerm] = useState<Permission | null>(null);
   const [editPerm, setEditPerm] = useState<PermissionData | null>(null);
 
@@ -132,7 +134,16 @@ export default function RolesPermissionsPage() {
         description="Manage RBAC permissions for the system."
         showBack={true}
       />
-      <div className="flex items-center justify-end">
+      <div className="flex items-center justify-end gap-2">
+        <Button
+          size="lg"
+          variant="outline"
+          className="mt-1"
+          onClick={() => setGivePermissionDialogOpen(true)}
+        >
+          <ShieldCheck className="size-4" />
+          Give Permission
+        </Button>
         <Button
           size="lg"
           className="mt-1"
@@ -177,6 +188,16 @@ export default function RolesPermissionsPage() {
         }}
       />
 
+      {/* Give Permission dialog */}
+      <GivePermissionDialog
+        open={givePermissionDialogOpen}
+        onOpenChange={setGivePermissionDialogOpen}
+        onAssigned={async () => {
+          await permissionsCache.clear();
+          await fetchPermissions(true);
+        }}
+      />
+
       <Card className="w-full">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -193,7 +214,6 @@ export default function RolesPermissionsPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>ID</TableHead>
                     <TableHead>Code</TableHead>
                     <TableHead>Name</TableHead>
                     <TableHead>Type</TableHead>
@@ -206,9 +226,6 @@ export default function RolesPermissionsPage() {
                 <TableBody>
                   {Array.from({ length: 5 }).map((_, i) => (
                     <TableRow key={i}>
-                      <TableCell>
-                        <Skeleton className="h-4 w-8" />
-                      </TableCell>
                       <TableCell>
                         <Skeleton className="h-4 w-36" />
                       </TableCell>
@@ -244,24 +261,21 @@ export default function RolesPermissionsPage() {
               No permissions found. Click "Add Permission" to create one.
             </p>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>ID</TableHead>
-                  <TableHead>Code</TableHead>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Module</TableHead>
-                  <TableHead>Parent Code</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {permissions.map((perm) => (
-                  <TableRow key={perm.id}>
-                    <TableCell className="font-medium">#{perm.id}</TableCell>
-                    <TableCell>
+            <Table>                <TableHeader>
+                  <TableRow>
+                    <TableHead>Code</TableHead>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Type</TableHead>
+                    <TableHead>Module</TableHead>
+                    <TableHead>Parent Code</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {permissions.map((perm) => (
+                    <TableRow key={perm.id}>
+                      <TableCell>
                       <code className="rounded bg-muted px-1.5 py-0.5 text-xs">
                         {perm.code}
                       </code>

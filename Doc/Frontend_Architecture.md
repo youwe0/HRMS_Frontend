@@ -108,6 +108,9 @@ src/
         └── ShowAttendance.tsx       # Attendance history table with month/year navigation
     └── RolesPermissions_page/
         ├── RolesPermissions.tsx     # Roles & permissions page — lists all permissions
+        ├── AddPermissionDialog.tsx  # Create/edit permission dialog
+        ├── DeletePermissionDialog.tsx  # Delete permission confirmation dialog
+        ├── GivePermissionDialog.tsx  # Assign permissions to user dialog
         └── SyncPermissionsDialog.tsx # Sync permissions dialog — pushes definitions to backend
 ```
 
@@ -754,25 +757,39 @@ src/
 |---|---|
 | `RolesPermissions.tsx` | Roles & permissions page — lists all permissions in a table |
 | `SyncPermissionsDialog.tsx` | Sync permissions dialog — pushes all permission definitions to the backend |
+| `AddPermissionDialog.tsx` | Create/edit single permission dialog |
+| `DeletePermissionDialog.tsx` | Delete permission confirmation dialog |
+| `GivePermissionDialog.tsx` | Assign permissions to a user dialog |
 
 **API Endpoints:**
 | Method | Endpoint | Description |
 |---|---|---|
 | `GET` | `/api/permissions` | Fetch all permissions |
 | `POST` | `/api/permissions` | Bulk-sync permissions from frontend definitions |
+| `POST` | `/api/permissions/create` | Create single permission |
+| `PUT` | `/api/permissions/{id}` | Update permission |
+| `DELETE` | `/api/permissions/{id}` | Soft-delete permission |
+| `GET` | `/api/users/{userId}/permissions` | Fetch user's assigned permissions |
+| `PUT` | `/api/users/{userId}/permissions` | Assign permissions to user |
 
 **Loading State:** Uses shadcn/ui `<Skeleton>` component to render 5 skeleton table rows matching the permissions table layout (ID, code, name, type badge, module, parent code, status badge).
 
 **Caching:**
 | Cache Module | TTL | Refetch Trigger |
 |---|---|---|
-| `permissions` | 24 hours | After sync — cache cleared and re-fetched |
+| `permissions` | 24 hours | After create/edit/delete/assign — cache cleared and re-fetched |
 
 **Variables:**
 | Variable | Type | Description |
 |---|---|---|
 | `permissions` | `Permission[]` | List of all permissions |
 | `syncDialogOpen` | boolean | Sync dialog open state |
+| `addDialogOpen` | boolean | Add permission dialog state |
+| `editDialogOpen` | boolean | Edit permission dialog state |
+| `deleteDialogOpen` | boolean | Delete permission dialog state |
+| `givePermissionDialogOpen` | boolean | Give permission dialog state |
+| `selectedPerm` | `Permission \| null` | Permission selected for delete |
+| `editPerm` | `PermissionData \| null` | Permission data for edit |
 
 **Permission Definitions:** The `SyncPermissionsDialog` contains a hardcoded array of ~80 permission definitions covering all sidebar modules (dashboard, employees, departments, designations, attendance, leave, etc.) with module, page, section, and button-level permissions.
 
