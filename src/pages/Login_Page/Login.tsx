@@ -7,11 +7,13 @@ import { Input } from "@/components/ui/input";
 import { api, setAuthToken } from "@/api/client";
 import { API_ENDPOINTS } from "@/config/endpoints";
 import { sha256 } from "@/lib/crypto";
+import { cacheSet } from "@/lib/indexedDb";
 import { useResourceBundle } from "@/hooks/useResourceBundle";
 
 type LoginResponse = {
   token: string;
   user: { id: string; userName: string; role: string };
+  permissions: string[];
 };
 
 export default function LoginPage() {
@@ -44,6 +46,10 @@ export default function LoginPage() {
       const data = await api.post<LoginResponse>(API_ENDPOINTS.LOGIN, payload);
 
       setAuthToken(data.token);
+
+      // Store permissions in IndexedDB for app-wide RBAC checks
+      await cacheSet("user_permissions", data.permissions, 0);
+
       navigate("/dashboard", { replace: true });
     } catch (err: unknown) {
       // Extract message from any error shape — ApiError, network, etc.

@@ -51,6 +51,7 @@ export const CACHE_TTL = {
   designationSearch: HOURS_24,
   companyMasterConfig: HOURS_24,
   permissions: HOURS_24,
+  userPermissions: 0, // session-scoped — cleared on logout
 
   //   Future modules — uncomment and set TTL:
   // roles:      60 * 60 * 1000,   // 1 hour

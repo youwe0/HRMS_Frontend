@@ -259,6 +259,7 @@ src/
 | `designationSearch` | 24 hours | Designation search autocomplete cache |
 | `companyMasterConfig` | 24 hours | Company master config |
 | `permissions` | 24 hours | Permissions list |
+| `userPermissions` | Never expires | Current user's permission codes (session-scoped, cleared on logout) |
 
 **Adding a new module:**
 1. Add a TTL entry to `CACHE_TTL` in `ConfigIndexedDB.ts`.
@@ -451,7 +452,7 @@ src/
 **API Endpoints:**
 | Method | Endpoint | Description |
 |---|---|---|
-| `POST` | `/api/auth/login` | Authenticate user, returns JWT token |
+| `POST` | `/api/auth/login` | Authenticate user, returns JWT token + permissions array |
 
 **Variables:**
 | Variable | Type | Description |
@@ -464,6 +465,15 @@ src/
 | `sessionExpired` | boolean | From URL param `?session_expired=1` |
 
 **Caching:** Calls `useResourceBundle()` on mount to pre-cache lookup data.
+
+**Response (LoginResponse):**
+| Field | Type | Description |
+|---|---|---|
+| `token` | string | JWT access token |
+| `user.id` | string | User ID |
+| `user.userName` | string | Username |
+| `user.role` | string | User role |
+| `permissions` | `string[]` | Array of permission `Code` values assigned to the user |
 
 **Side Effects:**
 - On success: stores token in `localStorage`, navigates to `/dashboard`.
@@ -838,6 +848,7 @@ All protected routes are wrapped with `<ProtectedLayout>` which checks for JWT t
 | Desig Search | `designationSearch_all` | 24h | IndexedDB (accumulated) | Each unique search term |
 | Attendance | — | — | No cache | Always fresh (month/year change) |
 | Permissions | `permissions_all` | 24h | IndexedDB | After sync |
+| User Permissions | `user_permissions` | Session | IndexedDB | On login (set) / On logout (clear) |
 | Dashboard | — | — | No cache | N/A (dummy data) |
 
 **Logout behaviour:** On logout, `cacheClearAllExcept(["resourceBundle_all"])` is called — all cached entries are deleted from IndexedDB except the resource bundle (static config data that never changes). This prevents stale user-specific data from leaking into a new session.
