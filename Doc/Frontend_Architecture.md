@@ -1,6 +1,6 @@
 # Frontend Architecture
 
-> **Last Updated:** 2026-09-04  
+> **Last Updated:** 2026-09-05  
 > **Stack:** Vite 8 + React 19 + TypeScript 6 + Tailwind CSS v4 + shadcn/ui + lucide-react  
 > **Dev Server:** `localhost:5173` (proxies `/api` → `localhost:5000`)
 
@@ -33,6 +33,7 @@
    - [My Profile](#47-my-profile-module)
    - [Company Master Config](#48-company-master-config-module)
    - [Attendance](#49-attendance-module)
+   - [Roles & Permissions](#410-roles--permissions-module)
 5. [Routing](#5-routing)
 6. [Caching Strategy Summary](#6-caching-strategy-summary)
 
@@ -105,6 +106,9 @@ src/
         ├── Attendance.tsx           # Attendance page — combines MakeAttendance + ShowAttendance
         ├── MakeAttendance.tsx       # Clock-in / clock-out button component
         └── ShowAttendance.tsx       # Attendance history table with month/year navigation
+    └── RolesPermissions_page/
+        ├── RolesPermissions.tsx     # Roles & permissions page — lists all permissions
+        └── SyncPermissionsDialog.tsx # Sync permissions dialog — pushes definitions to backend
 ```
 
 ---
@@ -173,6 +177,8 @@ src/
 | `GET_COMPANY_MASTER_CONFIG` | `"/company-master-config"` | CompanyMasterConfig |
 | `MAKE_ATTENDANCE(userId)` | `` `/attendance/${userId}` `` | MakeAttendance |
 | `GET_ATTENDANCE(userId)` | `` `/attendance/${userId}` `` | ShowAttendance |
+| `SYNC_PERMISSIONS` | `"/permissions"` | SyncPermissionsDialog |
+| `GET_PERMISSIONS` | `"/permissions"` | RolesPermissions |
 
 ---
 
@@ -244,6 +250,7 @@ src/
 | `departmentSearch` | 24 hours | Department search autocomplete cache |
 | `designationSearch` | 24 hours | Designation search autocomplete cache |
 | `companyMasterConfig` | 24 hours | Company master config |
+| `permissions` | 24 hours | Permissions list |
 
 **Adding a new module:**
 1. Add a TTL entry to `CACHE_TTL` in `ConfigIndexedDB.ts`.
@@ -739,6 +746,38 @@ src/
 
 ---
 
+### 4.10 Roles & Permissions Module
+
+**Path:** `/roles-permissions`  
+**Files:**
+| File | Purpose |
+|---|---|
+| `RolesPermissions.tsx` | Roles & permissions page — lists all permissions in a table |
+| `SyncPermissionsDialog.tsx` | Sync permissions dialog — pushes all permission definitions to the backend |
+
+**API Endpoints:**
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/api/permissions` | Fetch all permissions |
+| `POST` | `/api/permissions` | Bulk-sync permissions from frontend definitions |
+
+**Loading State:** Uses shadcn/ui `<Skeleton>` component to render 5 skeleton table rows matching the permissions table layout (ID, code, name, type badge, module, parent code, status badge).
+
+**Caching:**
+| Cache Module | TTL | Refetch Trigger |
+|---|---|---|
+| `permissions` | 24 hours | After sync — cache cleared and re-fetched |
+
+**Variables:**
+| Variable | Type | Description |
+|---|---|---|
+| `permissions` | `Permission[]` | List of all permissions |
+| `syncDialogOpen` | boolean | Sync dialog open state |
+
+**Permission Definitions:** The `SyncPermissionsDialog` contains a hardcoded array of ~80 permission definitions covering all sidebar modules (dashboard, employees, departments, designations, attendance, leave, etc.) with module, page, section, and button-level permissions.
+
+---
+
 ## 5. Routing
 
 **File:** `src/routes/index.tsx`
@@ -754,6 +793,7 @@ src/
 | `/my-profile` | `MyProfilePage` | Yes |
 | `/company-master-config` | `CompanyMasterConfigPage` | Yes |
 | `/attendance` | `AttendancePage` | Yes |
+| `/roles-permissions` | `RolesPermissionsPage` | Yes |
 | `*` | Redirects to `/dashboard` | — |
 
 All protected routes are wrapped with `<ProtectedLayout>` which checks for JWT token.
@@ -775,6 +815,7 @@ All protected routes are wrapped with `<ProtectedLayout>` which checks for JWT t
 | Dept Search | `departmentSearch_all` | 24h | IndexedDB (accumulated) | Each unique search term |
 | Desig Search | `designationSearch_all` | 24h | IndexedDB (accumulated) | Each unique search term |
 | Attendance | — | — | No cache | Always fresh (month/year change) |
+| Permissions | `permissions_all` | 24h | IndexedDB | After sync |
 | Dashboard | — | — | No cache | N/A (dummy data) |
 
 **Logout behaviour:** On logout, `cacheClearAllExcept(["resourceBundle_all"])` is called — all cached entries are deleted from IndexedDB except the resource bundle (static config data that never changes). This prevents stale user-specific data from leaking into a new session.

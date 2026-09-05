@@ -25,6 +25,11 @@ export const API_ENDPOINTS = {
   GET_COMPANY_MASTER_CONFIG: "/company-master-config",
   MAKE_ATTENDANCE: (userId: number) => `/attendance/${userId}`,
   GET_ATTENDANCE: (userId: number) => `/attendance/${userId}`,
+  SYNC_PERMISSIONS: "/permissions",
+  CREATE_PERMISSION: "/permissions/create",
+  GET_PERMISSIONS: "/permissions",
+  UPDATE_PERMISSION: (id: number) => `/permissions/${id}`,
+  DELETE_PERMISSION: (id: number) => `/permissions/${id}`,
 } as const;
 
 export type Endpoint = (typeof API_ENDPOINTS)[keyof typeof API_ENDPOINTS];

@@ -10,6 +10,7 @@ import LeaveTypesPage from "@/pages/LeaveType_page/LeaveTypes";
 import MyProfilePage from "@/pages/MyProfile_page/MyProfile";
 import CompanyMasterConfigPage from "@/pages/CompanyMasterConfig_page/CompanyMasterConfig";
 import AttendancePage from "@/pages/Attendance_page/Attendance";
+import RolesPermissionsPage from "@/pages/RolesPermissions_page/RolesPermissions";
 
 export function AppRoutes() {
   return (
@@ -77,6 +78,14 @@ export function AppRoutes() {
         element={
           <ProtectedLayout>
             <AttendancePage />
+          </ProtectedLayout>
+        }
+      />
+      <Route
+        path="/roles-permissions"
+        element={
+          <ProtectedLayout>
+            <RolesPermissionsPage />
           </ProtectedLayout>
         }
       />

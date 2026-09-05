@@ -6,6 +6,7 @@ import {
   CalendarDays,
   CalendarOff,
   Home,
+  Lock,
   LogOut,
   Menu,
   Moon,
@@ -33,6 +34,7 @@ const MENU_ITEMS = [
   { title: "Leave Types", url: "/leave", icon: CalendarOff },
   { title: "My Profile", url: "/my-profile", icon: UserCircle },
   { title: "Company Master Config", url: "/company-master-config", icon: Settings },
+  { title: "Roles & Permissions", url: "/roles-permissions", icon: Lock },
 ] as const;
 
 export function BottomNav() {
