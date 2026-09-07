@@ -830,7 +830,7 @@ import { HasPermission } from "@/components/ApputilityComponents/HasPermission";
 
 **Loading State:** Uses shadcn/ui `<Skeleton>` component to render 5 skeleton table rows matching the attendance table layout (date, day, clock in, clock out, shift, status badge).
 
-**Refetch:** Attendance history refetches when month/year changes.
+**Refetch:** Attendance history refetches when month/year changes or after a successful punch (clock-in/clock-out) via the `refreshKey` trigger.
 
 ---
 

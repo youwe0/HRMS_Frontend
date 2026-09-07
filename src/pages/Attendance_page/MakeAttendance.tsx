@@ -24,7 +24,11 @@ type AttendanceResponse = {
   attendance: AttendanceRecord;
 };
 
-export function MakeAttendance() {
+export function MakeAttendance({
+  onPunchSuccess,
+}: {
+  onPunchSuccess?: () => void;
+}) {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [isError, setIsError] = useState(false);
@@ -61,6 +65,7 @@ export function MakeAttendance() {
           setIsError(false);
           setLastAction("clock_out");
         }
+        onPunchSuccess?.();
       }
     } catch (err: unknown) {
       const apiErr = err as { status?: number; message?: string };

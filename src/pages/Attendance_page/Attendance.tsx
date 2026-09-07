@@ -1,9 +1,12 @@
+import { useState } from "react";
 import { MakeAttendance } from "@/pages/Attendance_page/MakeAttendance";
 import { ShowAttendance } from "@/pages/Attendance_page/ShowAttendance";
 import { Header } from "@/components/layout/Header";
 import { PageLayout } from "@/components/layout/PageLayout";
 
 export default function AttendancePage() {
+  const [refreshKey, setRefreshKey] = useState(0);
+
   return (
     <PageLayout>
       <Header
@@ -12,9 +15,9 @@ export default function AttendancePage() {
         showBack={true}
       />
       {/* Clock In / Out */}
-      <MakeAttendance />
+      <MakeAttendance onPunchSuccess={() => setRefreshKey((k) => k + 1)} />
       {/* Attendance History Table */}
-      <ShowAttendance />
+      <ShowAttendance refreshKey={refreshKey} />
     </PageLayout>
   );
 }

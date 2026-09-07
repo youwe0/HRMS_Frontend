@@ -89,7 +89,11 @@ function getWeekDay(dateString: string): string {
   return d.toLocaleDateString("en-US", { weekday: "short" });
 }
 
-export function ShowAttendance() {
+export function ShowAttendance({
+  refreshKey,
+}: {
+  refreshKey?: number;
+}) {
   const now = new Date();
   const [selectedMonth, setSelectedMonth] = useState(now.getMonth());
   const [selectedYear, setSelectedYear] = useState(now.getFullYear());
@@ -143,7 +147,7 @@ export function ShowAttendance() {
     return () => {
       cancelled = true;
     };
-  }, [selectedMonth, selectedYear]);
+  }, [selectedMonth, selectedYear, refreshKey]);
 
   const goToPreviousMonth = () => {
     if (selectedMonth === 0) {
