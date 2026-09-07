@@ -47,8 +47,9 @@ export default function LoginPage() {
 
       setAuthToken(data.token);
 
-      // Store permissions in IndexedDB for app-wide RBAC checks
+      // Store permissions and role in IndexedDB for app-wide RBAC checks
       await cacheSet("user_permissions", data.permissions, 0);
+      await cacheSet("user_role", data.user.role, 0);
 
       navigate("/dashboard", { replace: true });
     } catch (err: unknown) {

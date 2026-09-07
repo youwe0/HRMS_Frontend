@@ -307,19 +307,20 @@ src/
 
 ### 2.9 Permissions Hook — `hooks/usePermissions.ts`
 
-**Purpose:** Custom hook that loads the user's permission array from IndexedDB (set during login) and exposes a synchronous `hasPermission` check.
+**Purpose:** Custom hook that loads the user's role and permission array from IndexedDB (set during login) and exposes a synchronous `hasPermission` check. **Admin users get all permissions automatically.**
 
 | Export | Type | Description |
 |---|---|---|
-| `usePermissions()` | hook | Returns `{ hasPermission, permissions, loaded }` |
-| `hasPermission(perm)` | function | Returns `true` if `perm` is `null`/`undefined`/`""` (no restriction) or if `perm` exists in the user's permissions array. Returns `false` while permissions are still loading from IndexedDB. |
+| `usePermissions()` | hook | Returns `{ hasPermission, permissions, role, loaded }` |
+| `hasPermission(perm)` | function | Returns `true` if `perm` is `null`/`undefined`/`""` (no restriction), or if the user's role is `"admin"` (admin bypasses all checks), or if `perm` exists in the user's permissions array. Returns `false` while data is still loading from IndexedDB. |
 | `permissions` | `string[] \| null` | The raw permissions array, or `null` while loading |
-| `loaded` | boolean | `true` once permissions have been read from IndexedDB |
+| `role` | `string \| null` | The user's role, or `null` while loading |
+| `loaded` | boolean | `true` once both permissions and role have been read from IndexedDB |
 
 **How it works:**
-1. On mount, reads `"user_permissions"` from IndexedDB via `cacheGet`.
+1. On mount, reads `"user_permissions"` and `"user_role"` from IndexedDB via `cacheGet`.
 2. While loading, `hasPermission(null)` returns `true` (unrestricted items stay visible) and `hasPermission("x")` returns `false` (permission-gated items stay hidden until confirmed).
-3. After loading, performs a simple `Array.includes()` check.
+3. After loading, if role is `"admin"`, `hasPermission` always returns `true`. Otherwise, performs a simple `Array.includes()` check.
 
 **Used by:** `AppSidebar.tsx`, `BottomNav.tsx`, `HasPermission.tsx`.
 
@@ -544,7 +545,7 @@ import { HasPermission } from "@/components/ApputilityComponents/HasPermission";
 | `permissions` | `string[]` | Array of permission `Code` values assigned to the user |
 
 **Side Effects:**
-- On success: stores token in `localStorage`, navigates to `/dashboard`.
+- On success: stores token in `localStorage`, stores permissions and role in IndexedDB (`user_permissions`, `user_role`), navigates to `/dashboard`.
 - On 401 (expired session): shows orange banner.
 
 ---
@@ -919,6 +920,7 @@ All protected routes are wrapped with `<ProtectedLayout>` which checks for JWT t
 | Attendance | — | — | No cache | Always fresh (month/year change) |
 | Permissions | `permissions_all` | 24h | IndexedDB | After sync |
 | User Permissions | `user_permissions` | Session | IndexedDB | On login (set) / On logout (clear) |
+| User Role | `user_role` | Session | IndexedDB | On login (set) / On logout (clear) |
 | Dashboard | — | — | No cache | N/A (dummy data) |
 
 **Logout behaviour:** On logout, `cacheClearAllExcept(["resourceBundle_all"])` is called — all cached entries are deleted from IndexedDB except the resource bundle (static config data that never changes). This prevents stale user-specific data from leaking into a new session.
