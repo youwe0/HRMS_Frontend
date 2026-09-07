@@ -1,6 +1,6 @@
 # Frontend Architecture
 
-> **Last Updated:** 2026-09-05  
+> **Last Updated:** 2026-09-06  
 > **Stack:** Vite 8 + React 19 + TypeScript 6 + Tailwind CSS v4 + shadcn/ui + lucide-react  
 > **Dev Server:** `localhost:5173` (proxies `/api` → `localhost:5000`)
 
@@ -57,7 +57,8 @@ src/
 │   └── ConfigIndexedDB.ts           # IndexedDB configuration (DB name, version, TTLs per module)
 │
 ├── hooks/
-│   └── useResourceBundle.ts         # Custom hook — fetches & caches the ResourceBundle lookup data
+│   ├── useResourceBundle.ts         # Custom hook — fetches & caches the ResourceBundle lookup data
+│   └── usePermissions.ts            # Custom hook — reads user permissions from IndexedDB, exposes hasPermission()
 │
 ├── lib/
 │   ├── indexedDb.ts                 # IndexedDB cache abstraction (get/set/clear, module factory)
@@ -73,6 +74,9 @@ src/
 │   │   ├── Header.tsx               # Page header — title, description, real-time clock, back button
 │   │   ├── PageLayout.tsx           # Standard page wrapper (flex column + padding)
 │   │   └── ProtectedLayout.tsx      # Auth gate — redirects to /login if no token, wraps with sidebar
+│   ├── ApputilityComponents/
+│   │   ├── HasPermission.tsx        # Generic permission gate — wraps any element, renders children only if permitted
+│   │   └── ...                      # (LogoutDialog, ConnectionLost, etc.)
 │   └── UserSearchInputByDebouncing/
 │       └── UserSearchInput.tsx      # Reusable search autocomplete (user/department/designation)
 │
@@ -198,9 +202,16 @@ src/
 |---|---|---|
 | `sidebarSections` | `SidebarSection[]` | Array of sections, each with a `label` and `items[]` |
 | `SidebarSection` | type | `{ label: string, items: SidebarItem[] }` |
-| `SidebarItem` | type | `{ title: string, url: string, icon: LucideIcon }` |
+| `SidebarItem` | type | `{ title: string, url: string, icon: LucideIcon, HasPermission?: string \| null }` |
 
 **Sections:** Overview, Employment_details, Workforce, Time & Leave, Payroll & Benefits, Talent, Operations, Reports & Compliance, Administration.
+
+**Permission gating (`HasPermission`):** Each `SidebarItem` supports an optional `HasPermission` field (defaults to `null`). When set to a non-null string, the item is only visible if that permission exists in the user's permissions array (stored in IndexedDB under `user_permissions` during login). Sections with zero visible items are automatically hidden. `AppSidebar` and `BottomNav` both respect this field.
+
+**Currently gated sidebar items:**
+| Item | Section | Permission Key |
+|---|---|---|
+| Employees | Workforce | `Employees.Page` |
 
 **Adding a new page:** Add a `SidebarItem` to the appropriate section's `items` array.
 
@@ -294,7 +305,61 @@ src/
 
 ---
 
-### 2.9 Resource Bundle Hook — `hooks/useResourceBundle.ts`
+### 2.9 Permissions Hook — `hooks/usePermissions.ts`
+
+**Purpose:** Custom hook that loads the user's permission array from IndexedDB (set during login) and exposes a synchronous `hasPermission` check.
+
+| Export | Type | Description |
+|---|---|---|
+| `usePermissions()` | hook | Returns `{ hasPermission, permissions, loaded }` |
+| `hasPermission(perm)` | function | Returns `true` if `perm` is `null`/`undefined`/`""` (no restriction) or if `perm` exists in the user's permissions array. Returns `false` while permissions are still loading from IndexedDB. |
+| `permissions` | `string[] \| null` | The raw permissions array, or `null` while loading |
+| `loaded` | boolean | `true` once permissions have been read from IndexedDB |
+
+**How it works:**
+1. On mount, reads `"user_permissions"` from IndexedDB via `cacheGet`.
+2. While loading, `hasPermission(null)` returns `true` (unrestricted items stay visible) and `hasPermission("x")` returns `false` (permission-gated items stay hidden until confirmed).
+3. After loading, performs a simple `Array.includes()` check.
+
+**Used by:** `AppSidebar.tsx`, `BottomNav.tsx`, `HasPermission.tsx`.
+
+---
+
+### 2.10 Permission Gate Component — `components/ApputilityComponents/HasPermission.tsx`
+
+**Purpose:** Generic wrapper component that conditionally renders its children based on a permission string. Works with **any** element — divs, sections, buttons, cards, etc.
+
+| Prop | Type | Default | Description |
+|---|---|---|---|
+| `permission` | `string \| null \| undefined` | — | Permission key to check. `null`/`undefined` = always render. |
+| `children` | `ReactNode` | — | Content rendered when permission check passes. |
+| `fallback` | `ReactNode` | `null` | Content rendered when permission check fails. |
+
+**Usage examples:**
+```tsx
+import { HasPermission } from "@/components/ApputilityComponents/HasPermission";
+
+{/* Hide a whole section */}
+<HasPermission permission="payroll.view">
+  <div>This payroll section is only visible to authorized users</div>
+</HasPermission>
+
+{/* Hide a button */}
+<HasPermission permission="settings.edit">
+  <Button>Save Settings</Button>
+</HasPermission>
+
+{/* Show alternative content */}
+<HasPermission permission="admin.access" fallback={<p>Access denied</p>}>
+  <AdminPanel />
+</HasPermission>
+```
+
+**Internally uses:** `usePermissions()` hook.
+
+---
+
+### 2.11 Resource Bundle Hook — `hooks/useResourceBundle.ts`
 
 **Purpose:** Custom hook that fetches static lookup data (blood groups, genders, employee types, holiday types) from the API and caches it in IndexedDB.
 
@@ -312,7 +377,7 @@ src/
 
 ---
 
-### 2.10 Loading Screen — `components/AppLoader.tsx`
+### 2.12 Loading Screen — `components/AppLoader.tsx`
 
 **Purpose:** Shows a loading screen on page load and fades out once the app is ready.
 
@@ -336,7 +401,7 @@ src/
 
 ---
 
-### 2.11 Connection Lost Overlay — `components/ApputilityComponents/ConnectionLost.tsx`
+### 2.13 Connection Lost Overlay — `components/ApputilityComponents/ConnectionLost.tsx`
 
 **Purpose:** Full-screen overlay that detects browser online/offline status and shows a branded "Connection Lost" page when the user loses internet connectivity.
 
@@ -361,7 +426,7 @@ src/
 
 ---
 
-### 2.12 Logout Dialog — `components/ApputilityComponents/LogoutDialog.tsx`
+### 2.14 Logout Dialog — `components/ApputilityComponents/LogoutDialog.tsx`
 
 **Purpose:** Reusable logout confirmation dialog. Handles cache cleanup, token removal, and navigation internally.
 
@@ -378,7 +443,7 @@ src/
 
 ---
 
-### 2.13 User Search Input — `components/UserSearchInputByDebouncing/UserSearchInput.tsx`
+### 2.15 User Search Input — `components/UserSearchInputByDebouncing/UserSearchInput.tsx`
 
 **Purpose:** Reusable autocomplete search component with debounced API calls and IndexedDB caching. Supports searching users, departments, and designations.
 
@@ -412,6 +477,8 @@ src/
 ### `AppSidebar.tsx`
 - **Purpose:** Desktop sidebar — collapsible (icon-only by default, expands on hover).
 - Renders navigation from `sidebarSections` config.
+- Filters items based on `HasPermission` — uses `usePermissions()` hook.
+- Sections with zero visible items are automatically hidden.
 - Includes logout dialog and theme toggle (light/dark).
 - **Hidden below `md` breakpoint** via Tailwind.
 
@@ -419,6 +486,7 @@ src/
 - **Purpose:** Mobile bottom navigation bar (shown below `md`).
 - Shows 3 main items: Home, Attendance, Leave.
 - Slide-up menu with additional pages (Employees, Departments, etc.).
+- Filters items based on `HasPermission` — uses `usePermissions()` hook.
 - Includes theme toggle (Moon/Sun) and logout button in the slide-up menu.
 - Logout clears IndexedDB cache (except resource bundle), removes token, navigates to `/login`.
 - `BOTTOM_NAV_ITEMS` — main bar items.
@@ -517,6 +585,8 @@ src/
 | Cache Module | TTL | Refetch Trigger |
 |---|---|---|
 | `employees` | 12 hours | After add/edit employee — `cache.clear()` then re-fetch |
+
+**Permission Gating:** The "Add Employee" button is gated by `Employees.Add` — only visible if the user has that permission.
 
 **Loading State:** Uses shadcn/ui `<Skeleton>` component to render 6 placeholder cards matching the employee card layout (circular avatar, name, ID, role badge, edit button).
 

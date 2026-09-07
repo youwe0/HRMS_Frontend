@@ -38,6 +38,10 @@ export type SidebarItem = {
   url: string;
   //  Lucide icon shown next to the title.
   icon: LucideIcon;
+  // RBAC: permission key required to see this item.
+  // null (default) = always visible; non-null = visible only if the
+  // permission exists in the user's permissions array from the login API.
+  HasPermission?: string | null;
 };
 
 export type SidebarSection = {
@@ -67,7 +71,7 @@ export const sidebarSections: SidebarSection[] = [
   {
     label: "Workforce",
     items: [
-      { title: "Employees", url: "/employees", icon: Users },
+      { title: "Employees", url: "/employees", icon: Users, HasPermission: "Employees.Page" },
       { title: "Onboarding", url: "/onboarding", icon: UserPlus },
       { title: "Offboarding", url: "/offboarding", icon: UserMinus },
       { title: "Departments", url: "/departments", icon: Building2 },

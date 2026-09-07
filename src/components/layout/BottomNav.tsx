@@ -19,15 +19,23 @@ import {
 
 import { cn } from "@/lib/utils";
 import { useTheme } from "@/components/ApputilityComponents/theme-provider";
+import { usePermissions } from "@/hooks/usePermissions";
 import { LogoutDialog } from "@/components/ApputilityComponents/LogoutDialog";
 
-const BOTTOM_NAV_ITEMS = [
+type BottomNavItem = {
+  title: string;
+  url: string;
+  icon: React.ComponentType<{ className?: string }>;
+  HasPermission?: string | null;
+};
+
+const BOTTOM_NAV_ITEMS: readonly BottomNavItem[] = [
   { title: "Home", url: "/dashboard", icon: Home },
   { title: "Attendance", url: "/attendance", icon: CalendarDays },
   { title: "Leave", url: "/leave", icon: CalendarOff },
 ] as const;
 
-const MENU_ITEMS = [
+const MENU_ITEMS: readonly BottomNavItem[] = [
   { title: "Employees", url: "/employees", icon: Users },
   { title: "Departments", url: "/departments", icon: Building2 },
   { title: "Designations", url: "/designations", icon: Briefcase },
@@ -41,7 +49,16 @@ export function BottomNav() {
   const navigate = useNavigate();
   const location = useLocation();
   const { theme, toggleTheme } = useTheme();
+  const { hasPermission } = usePermissions();
   const [menuOpen, setMenuOpen] = useState(false);
+
+  // Filter items based on HasPermission.
+  const visibleBottomItems = BOTTOM_NAV_ITEMS.filter((item) =>
+    hasPermission(item.HasPermission),
+  );
+  const visibleMenuItems = MENU_ITEMS.filter((item) =>
+    hasPermission(item.HasPermission),
+  );
 
   return (
     <>
@@ -70,7 +87,7 @@ export function BottomNav() {
           </button>
         </div>
         <div className="p-4">
-          {MENU_ITEMS.map((item) => {
+          {visibleMenuItems.map((item) => {
             const active = location.pathname === item.url;
             return (
               <button
@@ -140,7 +157,7 @@ export function BottomNav() {
         </button>
 
         {/* Main nav items — center */}
-        {BOTTOM_NAV_ITEMS.map((item) => {
+        {visibleBottomItems.map((item) => {
           const active = location.pathname === item.url;
           return (
             <button

@@ -4,6 +4,7 @@ import { Building2, LogOut, Moon, Sun } from "lucide-react";
 
 import { APP_NAME } from "@/config";
 import { sidebarSections } from "@/config/sidebar";
+import { usePermissions } from "@/hooks/usePermissions";
 import { LogoutDialog } from "@/components/ApputilityComponents/LogoutDialog";
 import {
   Sidebar,
@@ -64,9 +65,18 @@ function useContentOverflow(ref: RefObject<HTMLElement | null>) {
 export function AppSidebar() {
   const { setOpen } = useSidebar();
   const { theme, toggleTheme } = useTheme();
+  const { hasPermission } = usePermissions();
 
   const contentRef = useRef<HTMLDivElement>(null);
   const contentOverflows = useContentOverflow(contentRef);
+
+  // Filter sections and items based on HasPermission.
+  const visibleSections = sidebarSections
+    .map((section) => ({
+      ...section,
+      items: section.items.filter((item) => hasPermission(item.HasPermission)),
+    }))
+    .filter((section) => section.items.length > 0);
 
   return (
     <Sidebar
@@ -93,7 +103,7 @@ export function AppSidebar() {
 
       <div className="relative flex min-h-0 flex-1 flex-col">
         <SidebarContent ref={contentRef}>
-          {sidebarSections.map((section) => (
+          {visibleSections.map((section) => (
             <SidebarGroup key={section.label}>
               <SidebarGroupLabel>{section.label}</SidebarGroupLabel>
               <SidebarGroupContent>

@@ -25,6 +25,7 @@ import { AddEmployeeDialog } from "@/pages/Employee_page/AddEmployeeDialog";
 import { EditEmploymentDetailsDialog } from "@/pages/Employee_page/EditEmploymentDetailsDialog";
 import { createModuleCache } from "@/lib/indexedDb";
 import { Skeleton } from "@/components/ui/skeleton";
+import { usePermissions } from "@/hooks/usePermissions";
 
 type Employee = {
   userId: number;
@@ -61,6 +62,7 @@ export default function EmployeesPage() {
   );
   const [currentPage, setCurrentPage] = useState(1);
   const [pagination, setPagination] = useState<PaginationMeta | null>(null);
+  const { hasPermission } = usePermissions();
 
   const fetchEmployees = useCallback(async (page: number) => {
     setEmployeesLoading(true);
@@ -156,12 +158,14 @@ export default function EmployeesPage() {
         description="Register new employees into the system."
         showBack={true}
       />
-      <div className="flex items-center justify-end">
-        <Button size="lg" className="mt-1" onClick={() => setDialogOpen(true)}>
-          <UserPlus className="size-4" />
-          Add Employee
-        </Button>
-      </div>
+      {hasPermission("Employees.Add") && (
+        <div className="flex items-center justify-end">
+          <Button size="lg" className="mt-1" onClick={() => setDialogOpen(true)}>
+            <UserPlus className="size-4" />
+            Add Employee
+          </Button>
+        </div>
+      )}
       <AddEmployeeDialog
         open={dialogOpen}
         onOpenChange={setDialogOpen}
